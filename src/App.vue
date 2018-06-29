@@ -85,5 +85,18 @@ button {
   line-height: 1.5em;
   margin-right: .5em;
 }
-
+.tags input{
+	background:none!important;
+	border:none!important;
+	box-shadow:none!important;
+	-webkit-box-shadow:none!important;
+	padding:0;
+	width:9em;
+}
+.tags button{
+	margin:0;
+	padding:0;
+	min-width:1.5em;
+	min-height:1.5em;
+}
 </style>

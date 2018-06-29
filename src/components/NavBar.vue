@@ -49,11 +49,12 @@ nav {
   background: white;
   display: flex;
   justify-content: space-around;
-  max-width:760px;
+  max-width:768px;
   align-items: center;
-  box-shadow: 0 -0.1em 0.3em black;
+  box-shadow: 0 0.5em 0.5em -0.5em;
   padding: 0.5em 0;
   background: #1d3557;
+  border-radius: 0 0 .5em .5em;
   margin: auto;
 }
 .logo {

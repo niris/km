@@ -13,7 +13,10 @@ api.use(require('multer')().fields([]));
 api.use((req, res, next) => { if (req.body.password) req.body.password = hash(req.body.password); next() });
 api.use((req, res, next) => { if (req.headers.authorization) req.user = fromToken(...req.headers.authorization.split(" ")); next() });
 
-// db.articles.find({"source.homeUrl" : { $regex : /^http/ }}).hint({"source.homeUrl" : 1})
+api.post('/token', (req, res) => db.collection('users')
+	.findOne({ _id: req.body._id, password: req.body.password })
+	.then(usr => res.set('authorization', usr ? toToken(usr._id) : null).sendStatus(usr ? 200 : 404))
+)
 
 api.get('/user', (req, res) => {
 	Object.keys(req.query).forEach((key, i) => req.query[key] = { $regex : new RegExp(`${req.query[key]}`,'i') });
@@ -47,23 +50,60 @@ api.get('/user/:_id/proj', (req, res) => { //a revoir
 				})
 		})
 })
+api.post('/users', (req, res) => {
+	var write, col = db.collection('users');
+	if (req.user == req.body._id) { // authenticated request => user is updating it profile
+		if (req.body.password == "") delete req.body.password;//empty pass == no update
+		write = col.update({ _id: req.user }, { $set: req.body });
+	} else {
+		write = col.insert(req.body);
+	}
+	write.then(doc => {
+		if (!doc) return res.sendStatus(500);
+		res.set('authorization', toToken(req.body._id));//set/update fetch token with the created/updated user
+		return res.json(doc.ops ? doc.ops[0] : doc);
+	}).catch(console.log);
+})
 
 api.get('/activity', (req, res) => {
+	Object.keys(req.query).forEach((key, i) => req.query[key] = { $regex : new RegExp(`${req.query[key]}`,'i') });
 	db.collection('activities')
-		.find(req.params).toArray()
-		.then(act => res.json(act))
+		.aggregate([{$match:req.query}]).toArray()
+		.then(r => res.json(r))
 })
 api.get('/activity/tags', (req, res) => {
 	db.collection('activities')
 		.aggregate([{ $project: { activity: 1 } }]).toArray()
 		.then(act => res.json([...new Set(act.forEach(act => act.activity))]))
 })
+
 api.get('/activity/:_id', (req, res) => {
 	db.collection('activities')
 		.findOne({ _id: req.params._id })
 		.then(r => res.json(r))
 })
-
+api.delete('/activity/:_id', (req, res) => {
+	if (!req.user) return res.sendStatus(401);
+	var col = db.collection('activities');
+	console.log(req.params._id, req.user);
+	col.findOneAndDelete({ _id: req.params._id, u_id: req.user })
+	.then(cmd=> res.status(cmd.ok ? 200 : 404).json(cmd))
+	.catch(console.error)
+})
+api.post('/activity', (req, res) => {
+	if (!req.user) return res.sendStatus(401);
+	var prom, col = db.collection('activities');
+	req.body.u_id = req.user;
+	console.log(req.body.tags)
+	req.body.tags = req.body.tags.filter(t=>t!='');
+	if (req.body._id)
+		write = col.update({ _id: req.body._id, u_id: req.user }, { $set: req.body }, { upsert: true })
+	else {
+		req.body._id = [req.user, +new Date()].join('-');
+		write = col.insert(req.body)
+	}
+	write.then(doc => doc ? res.send(doc) : res.sendStatus(500))
+})
 api.get('/search', (req, res) => {
 	if (req.query.type == "activity") {
 		return db.collection('activities').find({ $text: { $search: req.query.keyword } }).toArray()
@@ -78,54 +118,7 @@ api.get('/search', (req, res) => {
 	}
 })
 
-api.get('/activity/tags', (req, res) => db.collection('activities')
-	.aggregate([{ $project: { activity: 1 } }]).toArray()
-	.then(acts => res.json([...new Set(acts.forEach(act => act.activity))]))
-)
 
-api.post('/token', (req, res) => db.collection('users')
-	.findOne({ _id: req.body._id, password: req.body.password })
-	.then(usr => res.set('authorization', usr ? toToken(usr._id) : null).sendStatus(usr ? 200 : 404))
-)
-api.delete('/activity/:_id', (req, res) => {
-	if (!req.user) return res.sendStatus(401);
-	var col = db.collection('activities');
-	console.log(req.params._id, req.user);
-	col.findOneAndDelete({ _id: req.params._id, u_id: req.user })
-	.then(cmd=> res.status(cmd.ok ? 200 : 404).json(cmd))
-	.catch(console.error)
-})
-api.post('/activity', (req, res) => {
-	if (!req.user) return res.sendStatus(401);
-	var prom, col = db.collection('activities');
-	req.body.u_id = req.user;
-	if (req.body._id)
-		write = col.update({ _id: req.body._id, u_id: req.body.req.user }, { $set: req.body }, { upsert: true })
-	else {
-		req.body._id = [req.user, +new Date()].join('.');
-		write = col.insert(req.body)
-	}
-	write.then(doc => doc ? res.send(doc) : res.sendStatus(500))
-})
-
-api.post('/users', (req, res) => {
-	req.body.domain = (req.body.domain||'').split(/[\r\n]+/).filter(r=>r.length)
-	req.body.knowledge = (req.body.knowledge||'').split(/[\r\n]+/).filter(r=>r.length)
-	req.body.publications = (req.body.publications||'').split(/[\r\n]+/).filter(r=>r.length)
-
-	var write, col = db.collection('users');
-	if (req.user == req.body._id) { // authenticated request => user is updating it profile
-  	if (req.body.password == "") delete req.body.password;//empty pass == no update
-		write = col.update({ _id: req.user }, { $set: req.body });
-	} else {
-		write = col.insert(req.body);
-	}
-	write.then(doc => {
-		if (!doc) return res.sendStatus(500);
-		res.set('authorization', toToken(req.body._id));//set/update fetch token with the created/updated user
-		return res.json(doc.ops ? doc.ops[0] : doc);
-	}).catch(console.log);
-})
 // catch any mongo/express Errors
 api.use((err, req, res, next) => { console.error(err.stack); res.status(500).json(err) });
 

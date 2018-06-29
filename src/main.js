@@ -29,7 +29,6 @@ import App from '@/App'
 import Home from '@/components/Home'
 import Activity from '@/components/Activity'
 import User from '@/components/User'
-import Search from '@/components/Search'
 import Graph from '@/components/Graph'
 
 new Vue({
@@ -47,10 +46,8 @@ new Vue({
     mode: 'history',
     routes: [
       { path: '/', name: "Home", component: Home },
-      { path: '/search', name: "Search", component: Search },
       { path: '/activity/:id?', name: "Activity", component: Activity, props: true },
       { path: '/user/:id?', name: "User", component: User, props: true },
-      { path: '/graph/:id?', name: "Graph", component: Graph, props: true },
     ]
   }),
 })

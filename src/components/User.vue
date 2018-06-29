@@ -1,11 +1,11 @@
 <template>
-<div>
 <form v-on:submit.prevent=post method=POST action=/api/users>
   <h1 v-if=create>Create a new account</h1>
   <h1 v-if=update>My Account</h1>
   <h1 v-if=search>Account detail</h1>
   <!-- create:{{create}} update:{{update}} search:{{search}} edit:{{edit}} -->
-  <div class="grid-m-a">
+
+  <div class="grid-m-a" v-if=user>
     <label>First Name</label>
     <input v-if=edit name=firstName autocomplete=given-name :value=user.firstName>
     <p v-else>{{user.firstName}}</p>
@@ -16,7 +16,7 @@
     
     <label>Email</label>
     <input v-if=edit name=email autocomplete=email :value=user.email>
-    <p v-else>{{user.email}}</p>
+    <p v-else><a :href="'mailto:'+user.email">{{user.email}}</a></p>
     
     <label>Department</label>
     <input v-if=edit name=department autocomplete=organization :value=user.department>
@@ -27,62 +27,70 @@
     <p v-else>{{user.startwork}}</p>
     
     <label>Function</label>
-    <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title :value=user.function>
+    <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title :value=user.function list=suggests />
     <p v-else>{{user.function}}</p>
     
     <label>Telephone</label>
-    <input v-if=edit name=phone type=tel autocomplete=tel :value=user.phone>
+    <input v-if=edit name=phone type=tel autocomplete="tel-national" :value=user.phone>
     <p v-else>{{user.phone}}</p>
     
     <label>Address</label>
     <input v-if=edit name=address autocomplete=street-address :value=user.address>
     <p v-else>{{user.address}}</p>
     
-    <label>Major Expertises<em v-if=edit> (one by line)</em></label>
-    <textarea v-if=edit name=domain placeholder="ex. Real Time Embed Quantic Operating Systems" :value="(user.domain||[]).join('\n')" @keydown=adapt rows=10></textarea>
-    <ul v-else><li v-for="u in user.domain" :key=u>{{u}}</li></ul>
-    
-    <label>Other Knowledge<em v-if=edit> (one by line)</em></label>
-    <textarea v-if=edit name=knowledge placeholder="ex. Baseball Player" :value="(user.knowledge||[]).join('\n')" @keydown=adapt rows=10></textarea>
-    <ul v-else><li v-for="u in user.knowledge" :key=u>{{u}}</li></ul>
-    
-    <label>Publications<em v-if=edit> (one by line)</em></label>
-    <textarea v-if=edit name=publications placeholder="ex. Mezghani, Manel and On-At, Sirinya My Title, vol. 21 (n° 4). pp. 67-81. ISSN 1633-1311" :value="(user.publications||[]).join('\n')" @keydown=adapt rows=10></textarea>
-    <ul v-else><li v-for="u in user.publications" :key=u>{{u}}</li></ul>
-    
     <label>Description</label>
-    <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" :value=user.description @keydown=adapt rows=15 />
+    <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" :value=user.description rows=15 />
     <p v-else v-html="md(user.description)"/>
     
-    <br><hr>
+    <label>Publications</label>
+    <ul v-if=edit style="list-style: none;padding: 0;">
+      <li v-for="t in (user.publications||[]).concat([''])"><input name=knowledge[] :value=t placeholder="ex. ICDM 2018 Egocentric Network Analysis" @keyup=autocomplete list=suggests></li>
+      <button @click.prevent="user.publications.push('');" title="Add publications">+ Add a new publications</button>
+      <button @click.prevent="user.publications.pop()" v-if="user.publications &&user.publications.length" title="Delete publications">✕ Remove last publications</button>
+    </ul>
+    <ul v-else><li v-for="u in user.publications" :key=u>{{u}}</li></ul>
     
+    <label>Major Expertises</label>
+    <ul v-if=edit class=tags>
+      <li v-for="t in (user.domain||[]).concat([''])"><input name=domain[] :value=t placeholder="new domain..." @keyup=autocomplete list=suggests></li>
+      <button @click.prevent="user.domain.push('');" title="Add domain">+</button>
+      <button @click.prevent="user.domain.pop()" v-if="user.domain && user.domain.length" title="Delete domain">✕</button>
+    </ul>
+    <ul v-else class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul>
+    
+    <label>Other Knowledge</label>
+    <ul v-if=edit class=tags>
+      <li v-for="t in (user.knowledge||[]).concat([''])"><input name=knowledge[] :value=t placeholder="new knowledge..." @keyup=autocomplete list=suggests></li>
+      <button @click.prevent="user.knowledge.push('');" title="Add knowledge">+</button>
+      <button @click.prevent="user.knowledge.pop()" v-if="user.knowledge &&user.knowledge.length" title="Delete knowledge">✕</button>
+    </ul>
+    <ul v-else class=tags><li v-for="u in user.knowledge" :key=u>{{u}}</li></ul>
+
     <label v-if=create>Login</label>
     <input name=_id autocomplete=username required :value=user._id :type="create?'text':'hidden'">
     
     <label v-if=edit>Password</label>
     <input v-if=edit name=password type=password placeholder="unchanged" :value="''" autocomplete="current-password">
   </div>
-  <template v-if=!create>
-    <h4>Activities</h4>
-    <ul v-if=user.activities.length>
-      <li v-for="a in user.activities" :key=a._id>
-        <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
-        <form v-on:submit.prevent=activityDelete method=DELETE :action="'/api/activity/'+a._id" style="display:inline">
-          <button title="delete" style="padding: 0;width: 2em;">❌</button>
-        </form>
-      </li>
-    </ul>
-    <p v-else>This user does not have any activities</p>
-  </template>
+	<datalist id=suggests></datalist>
+  <h1>User's Activities</h1>
+  <ul v-if="user.activities && user.activities.length">
+    <li v-for="a in user.activities" :key=a._id>
+      <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
+      <form v-on:submit.prevent=activityDelete method=DELETE :action="'/api/activity/'+a._id" style="display:inline">
+        <button title="delete" style="padding: 0;width: 2em;">❌</button>
+      </form>
+    </li>
+  </ul>
+  <p v-else>This user does not have any activities</p>
   <div class=fab>
     <button v-if="create" title="Create">+</button>
     <button v-if="update&&edit" title="Update">✓</button>
     <button v-if="update&&edit" v-on:click.prevent="editmode=false" title="Cancel">✕</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
   </div>
+	<Graph v-if="!edit" :id=this.id ></Graph>
 </form>
-<Graph v-if="!create" :id=this.id ></Graph>
-</div>
 </template>
 <script>
 import Graph from "@/components/Graph";
@@ -95,7 +103,7 @@ export default {
   }),
   computed: {
     edit: function() {
-      return !this.id || this.editmode;
+      return this.create || this.editmode;
     },
     create: function() {
       return !this.id;
@@ -111,18 +119,22 @@ export default {
     this.load(this.id);
   },
   methods: {
-    adapt(event) {
-      var el = event.target;
-      setTimeout(function() {
-        el.style.cssText = "height:auto; padding:0";
-        el.style.cssText = "height:" + (+el.scrollHeight + 20) + "px";
-      }, 0);
-    },
     md(text) {
       return text ? marked(text, { sanitize: true }) : "";
     },
+    autocomplete(event) {
+      var name = event.target.name.match(/\w+/)[0];
+      var value = event.target.value;
+      this.sfetch('/api/user',{[name]:value})
+      .then(r=>r.json()).then(users => {
+        var val = [...new Set([].concat(...users.map(u => u[name])))].filter(m => m.match(value) && value != m);
+        var el = document.getElementById('suggests');
+        el.innerHTML=val?val.map(s=>'<option>'+s+'</option>'):'';
+        console.log(val, el.innerHTML)
+      }).catch(console.error)
+    },
     load(id) {
-      this.user = {};
+      this.user = {domain:[],publications:[],knowledge:[]};
       if (!id) return;
       this.sfetch(`/api/user/${id}`)
         .then(res => res.json())

@@ -29,22 +29,24 @@
 			<button>Search</button>
 		</ul>
 		</fieldset>
-		<h1 v-if=users.length>Users</h1>
-		<ul>
+		<h1 v-if="users && users.length">Users</h1>
+		<h4 v-if="users && !users.length">No users found</h4>
+		<ul v-if=users>
 			<li v-for="u in users">
 				<router-link :to="{name:'User', params:{id:u._id}}">{{ u.firstName }} {{ u.lastName }} - {{u.function}} {{u.department}}</router-link>
 				{{user}}
 			</li>
 		</ul>
-		<h1 v-if=activities.length>Activities</h1>
-		<ul>
+		<h1 v-if="activities && activities.length">Activities</h1>
+		<h4 v-if="activities && !activities.length">No activities found</h4>
+		<ul v-if=activities>
 			<li v-for="a in activities"><router-link :to="{name:'Activity', params:{id:a._id}}">{{ a.type }} - {{ a.name }}</router-link> by <router-link :to="{name:'User', params:{id:a.u_id}}">{{ a.u_id }}</router-link></li>
 		</ul>
 	</form>
-  </div>
+</div>
 
 <div class="grp">  
-    <Graph v-if= "!( users.length || activities.length)" id=""></Graph>
+    <Graph v-if= "!users && !activities" id=""></Graph>
 	</div>
   	</div>
 </template>
@@ -52,17 +54,17 @@
 <script>
 import Graph from "@/components/Graph";
 
-
 export default {
   components: { Graph },
   data: () => ({
-    users:[],
-    activities:[],
+    users:null,
+    activities:null,
   }),
   methods: {
     search($event){
+      this.users = this.activities = null;
       this.sfetch($event.target).then(req=>req.json())
-      .then(([u,a]) => [this.users, this.activities] = [u||[], a||[]])
+      .then(([u,a]) => [this.users, this.activities] = [u, a])
       .catch(this.$root.$refs.toast)
     }
   },

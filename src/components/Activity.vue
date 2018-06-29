@@ -3,6 +3,7 @@
   <h1 v-if=create>Create a new Activity</h1>
   <h1 v-if=update>Update my Activity</h1>
   <h1 v-if=search>Activity detail</h1>
+
   <div class="grid-m-a" v-if=this.activity>
     <input v-if=id type=hidden name=_id :value=activity._id>
 
@@ -10,35 +11,45 @@
     <p v-if=!create><router-link :to="{name:'User', params:{id:activity.u_id}}">{{activity.u_id}}</router-link></p>
     
     <label>Type</label>
-    <input v-if=edit name=type :value=activity.type>
+    <select v-if=edit name=type :value=activity.type required>
+      <option>Conference/Workshop/Seminar</option>
+      <option>Visit</option>
+      <option>Research</option>
+      <option>Contest</option>
+    </select>
     <p v-else>{{activity.type}}</p>
 
     <label>Name</label>
-    <input v-if=edit name=name :value=activity.name>
+    <input v-if=edit name=name :value=activity.name required>
     <p v-else>{{activity.name}}</p>
 
     <label>Description</label>
     <textarea v-if=edit name=description :value=activity.description rows=15 />
-    <div v-else v-html="md(activity.description)"/>
+    <div v-else v-html="md(activity.description||'')"/>
 
     <label>Conclusion</label>
     <textarea v-if=edit name=conclusion :value=activity.conclusion rows=15 />
-    <div v-else v-html="md(activity.description)"/>
+    <div v-else v-html="md(activity.conclusion||'')"/>
 
     <label>Tags</label>
-    <input v-if=edit name=tags :value=activity.tags>
-    <p v-else>{{activity.tags}}</p>
+    <ul v-if=edit class=tags>
+      <li v-for="t in activity.tags.concat([''])"><input name=tags[] :value=t placeholder="new tag..." @keyup=autocomplete list=suggests></li>
+      <button @click.prevent="activity.tags.push('');" title="Add Tag">+</button>
+      <button @click.prevent="activity.tags.pop()" v-if="activity.tags.length" title="Delete Tag">✕</button>
+    </ul>
+    <ul v-else class=tags>
+      <li v-for="t in activity.tags">{{t}} </li>
+    </ul>
 
     <label>Started</label>
-    <input v-if=edit type=date name=from :value=activity.from :max="new Date().toJSON().split('T')[0]">
+    <input v-if=edit type=date name=from :value=activity.from :max="new Date().toJSON().split('T')[0]" required>
     <p v-else>{{activity.from}}</p>
 
     <label>Ended</label>
-    <input v-if=edit type=date name=to :value=activity.to :min=activity.from :max="new Date().toJSON().split('T')[0]">
+    <input v-if=edit type=date name=to :value=activity.to :min=activity.from :max="new Date().toJSON().split('T')[0]" required>
     <p v-else>{{activity.to}}</p>
-
-    <br><hr>
   </div>
+  <datalist id=suggests></datalist>
   <div class=fab>
     <button v-if=create>+</button>
     <button v-if="update&&edit" title="Update">✓</button>
@@ -53,7 +64,7 @@ export default {
   props: ["id"],
   data: () => ({
     editmode: false,
-    activity: {}
+    activity: {tags:[]},
   }),
   computed: {
     edit: function() {
@@ -85,23 +96,27 @@ export default {
     md(text) {
       return marked(text, { sanitize: true });
     },
+    autocomplete(event) {
+      var name = event.target.name.match(/\w+/)[0];
+      var value = event.target.value;
+      this.sfetch('/api/activity',{[name]:value})
+      .then(r=>r.json()).then(users => {
+        var val = [...new Set([].concat(...users.map(u => u[name])))].filter(m => m.match(value) && value != m);
+        var el = document.getElementById('suggests');
+        el.innerHTML=val?val.map(s=>'<option>'+s+'</option>'):'';
+      }).catch(console.error)
+    },
     post($event) {
       this.sfetch($event.target).then(res=>res.json())
       .then(r => {
-        this.$root.$refs.toast("Activity created. Let's go!");
-        this.$router.push({ name: "Activity", params: { id: r.insertedIds[0] } });
+        this.$root.$refs.toast("Activity saved");
+        if(r.insertedIds)this.$router.push({ name: "Activity", params: { id: r.insertedIds[0] } });
+        else this.load(this.$route.params.id);
+        this.editmode = false;
       })
       .catch(this.$root.$refs.toast)
     },
-    adapt(event) {
-      var el = event.target;
-      setTimeout(function() {
-        el.style.cssText = "height:auto; padding:0";
-        el.style.cssText = "height:" + (+el.scrollHeight + 20) + "px";
-      }, 0);
-    },
     load(id) {
-      this.activity = {};
       if (!id) return;
       this.sfetch(`/api/activity/${id}`)
         .then(res => res.json())
