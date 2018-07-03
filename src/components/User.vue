@@ -43,27 +43,15 @@
     <p v-else v-html="md(user.description)"/>
     
     <label>Publications</label>
-    <ul v-if=edit style="list-style: none;padding: 0;">
-      <li v-for="t in (user.publications||[]).concat([''])"><input name=knowledge[] :value=t placeholder="ex. ICDM 2018 Egocentric Network Analysis" @keyup=autocomplete list=suggests></li>
-      <button @click.prevent="user.publications.push('');" title="Add publications">+ Add a new publications</button>
-      <button @click.prevent="user.publications.pop()" v-if="user.publications &&user.publications.length" title="Delete publications">✕ Remove last publications</button>
-    </ul>
+    <TagList v-if=edit :list=user.publications placeholder="New Publication..." from="/api/user" name="publications[]"></TagList>
     <ul v-else><li v-for="u in user.publications" :key=u>{{u}}</li></ul>
     
     <label>Major Expertises</label>
-    <ul v-if=edit class=tags>
-      <li v-for="t in (user.domain||[]).concat([''])"><input name=domain[] :value=t placeholder="new domain..." @keyup=autocomplete list=suggests></li>
-      <button @click.prevent="user.domain.push('');" title="Add domain">+</button>
-      <button @click.prevent="user.domain.pop()" v-if="user.domain && user.domain.length" title="Delete domain">✕</button>
-    </ul>
+    <TagList v-if=edit :list=user.domain class=tags placeholder="New Domain..." from="/api/user" name="domain[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul>
     
     <label>Other Knowledge</label>
-    <ul v-if=edit class=tags>
-      <li v-for="t in (user.knowledge||[]).concat([''])"><input name=knowledge[] :value=t placeholder="new knowledge..." @keyup=autocomplete list=suggests></li>
-      <button @click.prevent="user.knowledge.push('');" title="Add knowledge">+</button>
-      <button @click.prevent="user.knowledge.pop()" v-if="user.knowledge &&user.knowledge.length" title="Delete knowledge">✕</button>
-    </ul>
+    <TagList v-if=edit :list=user.knowledge class=tags placeholder="New knowledge..." from="/api/user" name="knowledge[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.knowledge" :key=u>{{u}}</li></ul>
 
     <label v-if=create>Login</label>
@@ -94,8 +82,9 @@
 </template>
 <script>
 import Graph from "@/components/Graph";
+import TagList from "@/components/TagList";
 export default {
-  components: { Graph },
+  components: { Graph, TagList},
   props: ["id"],
   data: () => ({
     editmode: false,
@@ -152,6 +141,7 @@ export default {
             this.$router.push({ name: "User", params: { id: r._id } });
           } else {
             this.$root.$refs.toast("Profil Updated");
+            this.load(this.id);
             this.editmode = false;
           }
         })
@@ -163,22 +153,6 @@ export default {
         .then(r => {
           this.$root.$refs.toast("Activity Deleted");
           this.load(this.id);
-        })
-        .catch(this.$root.$refs.toast);
-    },
-    post($event) {
-      this.sfetch($event.target)
-        .then(req => req.json())
-        .then(r => {
-          if (this.create) {
-            this.$root.$refs.toast(
-              `Profil Created ! You are now connected as ${r._id}`
-            );
-            this.$router.push({ name: "User", params: { id: r._id } });
-          } else {
-            this.$root.$refs.toast("Profil Updated");
-            this.editmode = false;
-          }
         })
         .catch(this.$root.$refs.toast);
     },

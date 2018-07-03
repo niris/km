@@ -1,7 +1,7 @@
 <template>
 <form v-on:submit.prevent=post method=POST  action=/api/activity>
   <h1 v-if=create>Create a new Activity</h1>
-  <h1 v-if=update>Update my Activity</h1>
+  <h1 v-if=update>My Activity</h1>
   <h1 v-if=search>Activity detail</h1>
 
   <div class="grid-m-a" v-if=this.activity>
@@ -32,25 +32,22 @@
     <div v-else v-html="md(activity.conclusion||'')"/>
 
     <label>Tags</label>
-    <ul v-if=edit class=tags>
-      <li v-for="t in activity.tags.concat([''])"><input name=tags[] :value=t placeholder="new tag..." @keyup=autocomplete list=suggests></li>
-      <button @click.prevent="activity.tags.push('');" title="Add Tag">+</button>
-      <button @click.prevent="activity.tags.pop()" v-if="activity.tags.length" title="Delete Tag">✕</button>
-    </ul>
+    <TagList v-if=edit :list=activity.tags class=tags placeholder="New Tag..." from="/api/activity" name="tags[]"></TagList>
     <ul v-else class=tags>
-      <li v-for="t in activity.tags">{{t}} </li>
+      <li v-for="t in activity.tags" :key=t>{{t}} </li>
     </ul>
 
     <label>Started</label>
-    <input v-if=edit type=date name=from :value=activity.from :max="new Date().toJSON().split('T')[0]" required>
+    <input v-if=edit type=date name=from ref=start :value=activity.from required>
     <p v-else>{{activity.from}}</p>
 
     <label>Ended</label>
-    <input v-if=edit type=date name=to :value=activity.to :min=activity.from :max="new Date().toJSON().split('T')[0]" required>
+    <input v-if=edit type=date name=to :value=activity.to required>
     <p v-else>{{activity.to}}</p>
   </div>
   <datalist id=suggests></datalist>
   <div class=fab>
+    <button v-if="!edit" v-on:click.prevent="print" title="Print 🖶">📄</button>
     <button v-if=create>+</button>
     <button v-if="update&&edit" title="Update">✓</button>
     <button v-if="update&&edit" v-on:click.prevent="editmode=false" title="Cancel">✕</button>
@@ -60,11 +57,13 @@
 </template>
 
 <script>
+import TagList from "@/components/TagList";
 export default {
+  components: {TagList},
   props: ["id"],
   data: () => ({
     editmode: false,
-    activity: {tags:[]},
+    activity: {},
   }),
   computed: {
     edit: function() {
@@ -93,18 +92,16 @@ export default {
     }
   },
   methods: {
+    print() {
+      //Call the browser print dialog for PDF export
+      //window.print()
+      //Generate the raw PDF using JS
+      var doc = new jsPDF();
+      doc.fromHTML(this.$el);
+      doc.save(`${this.id}.pdf`);
+    },
     md(text) {
       return marked(text, { sanitize: true });
-    },
-    autocomplete(event) {
-      var name = event.target.name.match(/\w+/)[0];
-      var value = event.target.value;
-      this.sfetch('/api/activity',{[name]:value})
-      .then(r=>r.json()).then(users => {
-        var val = [...new Set([].concat(...users.map(u => u[name])))].filter(m => m.match(value) && value != m);
-        var el = document.getElementById('suggests');
-        el.innerHTML=val?val.map(s=>'<option>'+s+'</option>'):'';
-      }).catch(console.error)
     },
     post($event) {
       this.sfetch($event.target).then(res=>res.json())
@@ -117,6 +114,7 @@ export default {
       .catch(this.$root.$refs.toast)
     },
     load(id) {
+      this.activity = {};
       if (!id) return;
       this.sfetch(`/api/activity/${id}`)
         .then(res => res.json())

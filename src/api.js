@@ -52,6 +52,7 @@ api.get('/user/:_id/proj', (req, res) => { //a revoir
 })
 api.post('/users', (req, res) => {
 	var write, col = db.collection('users');
+	["domain","publications","knowledge"].forEach(n=>req.body[n]=req.body[n].filter(e=>e!==''))
 	if (req.user == req.body._id) { // authenticated request => user is updating it profile
 		if (req.body.password == "") delete req.body.password;//empty pass == no update
 		write = col.update({ _id: req.user }, { $set: req.body });

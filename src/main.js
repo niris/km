@@ -29,7 +29,6 @@ import App from '@/App'
 import Home from '@/components/Home'
 import Activity from '@/components/Activity'
 import User from '@/components/User'
-import Graph from '@/components/Graph'
 
 new Vue({
   el: '#app',

@@ -42,6 +42,11 @@ export default {
 };
 </script>
 <style scoped>
+@media only print{
+  nav {
+    display:none!important;
+  }
+}
 nav {
   position: sticky;
   top: 0;

@@ -21,20 +21,22 @@ export default {
 body {
   background: #ededed;
 }
-main {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid #ccc;
-  border-radius: 0.4em;
-  padding: 1em 2em 2em 2em;
-  margin: 2em auto;
- /* width: calc(100vh);
-  min-height: calc(100vh);*/
+@media only screen{
+  main {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ccc;
+    border-radius: 0.4em;
+    padding: 1em 2em 2em 2em;
+    margin: 2em auto;
+  /* width: calc(100vh);
+    min-height: calc(100vh);*/
+  }
 }
 
 button {
   cursor: pointer;
 }
-@media only screen and (min-width: 500px) {
+@media (min-width: 500px) {
   .grid-m-a label {
     line-height: 2.5;
     text-align: right;
@@ -56,12 +58,18 @@ button {
   }
 
 }
+@media print{
+  .fab{
+    display:none !important;
+  }
+}
 .fab {
   position: fixed;
   bottom: 0.5em;
   right: calc(50% - 480px);
+  z-index: 99;
 }
-@media only screen and (max-width: 960px) {
+@media (max-width: 960px) {
 	.fab {
 		right: 0.5em;
 	}
