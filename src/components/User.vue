@@ -5,14 +5,12 @@
   <h1 v-if=search>Account detail</h1>
   <!-- create:{{create}} update:{{update}} search:{{search}} edit:{{edit}} -->
 
+  <div class=avatar v-if=user>
+    <input name=avatar type=hidden>
+    <img id=preview :src="(user||{}).avatar||'data:image/gif;base64,R0lGODlhDgAOAIAAAICAgP///yH5BAEAAAEALAAAAAAOAA4AAAI'+(editmode?'XjI+py30AnIEyUAZzVlq364BfVJUmUwAAOw==':'bjI+JwKDX2otRUZkus3rSZ1TelWlbaGKpujoFADs=')">
+    <input type=file @change=thumb v-if=editmode>
+  </div>
   <div class="grid-m-a" v-if=user>
-    <label>Avatar</label>
-    <div class=avatar>
-      <input name=avatar type=hidden>
-      <img id=preview :src="(user||{}).avatar||'data:image/gif;base64,R0lGODlhDgAOAIAAAICAgP///yH5BAEAAAEALAAAAAAOAA4AAAI'+(editmode?'XjI+py30AnIEyUAZzVlq364BfVJUmUwAAOw==':'bjI+JwKDX2otRUZkus3rSZ1TelWlbaGKpujoFADs=')">
-      <input type=file @change=thumb v-if=editmode>
-    </div>
-
     <label>First Name</label>
     <input v-if=edit name=firstName autocomplete=given-name :value=user.firstName>
     <p v-else>{{user.firstName}}</p>
@@ -201,20 +199,23 @@ export default {
 };
 </script>
 <style scoped>
+h1{text-align: center}
 .avatar {
+  text-align: center;
   position:relative;
 }
 .avatar input[type=file]{
   position: absolute;
   left: 0;
-  width: 128px;
-  height: 128px;
+  width: 100%;
+  height: 256px;
   opacity: 0;
+  cursor:pointer;
 }
 .avatar img {
   border-radius: 100%;
   box-shadow: 0 0 .2em 0px;
-  width:128px;
-  height:128px;
+  width:256px;
+  height:256px;
 }
 </style>
