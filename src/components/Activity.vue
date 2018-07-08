@@ -1,5 +1,5 @@
 <template>
-<form v-on:submit.prevent=post method=POST  action=/api/activity>
+<form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/activity>
   <h1 v-if=create>Create a new Activity</h1>
   <h1 v-if=update>My Activity</h1>
   <h1 v-if=search>Activity detail</h1>
@@ -48,7 +48,7 @@
   <datalist id=suggests></datalist>
   <div class=fab>
     <button v-if="!edit" v-on:click.prevent="print" title="Print 🖶">📄</button>
-    <button v-if=create>+</button>
+    <button v-if=create>✓</button>
     <button v-if="update&&edit" title="Update">✓</button>
     <button v-if="update&&edit" v-on:click.prevent="editmode=false" title="Cancel">✕</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
@@ -95,6 +95,7 @@ export default {
     print() {
       //Call the browser print dialog for PDF export
       //window.print()
+
       //Generate the raw PDF using JS
       var doc = new jsPDF();
       doc.fromHTML(this.$el);
@@ -104,6 +105,10 @@ export default {
       return marked(text, { sanitize: true });
     },
     post($event) {
+      if(document.activeElement instanceof HTMLInputElement){
+        return $event.target[[].slice.call($event.target).findIndex(i=>i==document.activeElement)+1].focus()
+      }
+
       this.sfetch($event.target).then(res=>res.json())
       .then(r => {
         this.$root.$refs.toast("Activity saved");

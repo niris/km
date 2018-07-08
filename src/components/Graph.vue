@@ -17,14 +17,14 @@
 				<dt>Department : </dt>
   				<dd>{{user.department}}</dd>
 				<dt>Expert domain : </dt>
-          <!--<dd v-for="u in user.domain" :key=u>{{u}}</dd>-->
-           <dd>{{user.domain}}</dd>
+          <dd><ul class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul></dd>
+           <!--!<dd>{{user.domain}}</dd> -->
 				<dt>Knowledge : </dt>
-  				<dd>{{user.knowlege}}</dd>
-        <dt>Publications : </dt>
-          <!--<dd v-for="u in user.publications" :key=u>{{u}}</dd>-->
-          <dd>{{user.publications}}</dd>
-
+          <dd><ul class=tags><li v-for="u in user.Knowledge" :key=u>{{u}}</li></ul></dd>
+       <!-- <dt>Publications : </dt>
+         <dd v-for="u in user.publications" :key=u>{{u}}</dd>
+          <dd><ul><li v-for="u in user.publications" :key=u>{{u}}</li></ul></dd>
+        -->
 				 <dt>Contact : </dt>
   				<dd>{{user.email}}</dd>
 			</dl>
@@ -465,24 +465,20 @@ dl {
   line-height: 2.5;
 }
 dt {
+  position : relative;
   float: left;
-  width: 40%;
-  padding: 0;
-  margin: 0 !important; 
+  clear: left;
+  width: 45%;
   color: rgb(231, 234, 236);
   text-indent: 25px;
   font-weight: bold;
 }
 dd {
-  float: left;
-  width: 60%;
-  margin-left:45%;
-  margin-top:-10%;
-    margin-bottom:0;
-
-  padding:0;
+  width: 65%;
+  margin-left: 45%;
   color: rgb(231, 234, 236);
 }
+
 dd:after {
   content: "\a";
   white-space: pre;
@@ -490,34 +486,31 @@ dd:after {
 
 .sidebar {
   height: 88%;
-  width: 35%;
+  width: 30%;
   position: relative;
   z-index: 1;
   top: 0;
   left: 0;
   background-color: #1d3557;
-  margin-top: 7%;
+  margin-top: 5%;
+  margin-right :1%;
 }
 
 .sidenbar a:hover {
   color: #f1f1f1;
 }
 
- #graph {
+#graph {
   position: relative;
-  width : 100%;
+  width: 100%;
   vertical-align: center;
   overflow: auto;
 }
 
-g.links{
-  position : relative;
-  width : 100%;
+g.links {
+  position: relative;
+  width: 100%;
   height: 50%;
-
 }
-
- 
-
 
 </style>

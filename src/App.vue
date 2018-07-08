@@ -87,11 +87,11 @@ button {
 }
 .tags li{
   display: inline-block;
-  background: #d7dfff;
   border-radius: 1em;
   padding: 0 .5em;
   line-height: 1.5em;
   margin-right: .5em;
+  box-shadow: 0.05em 0.05em 0.1em;
 }
 .tags input{
 	background:none!important;

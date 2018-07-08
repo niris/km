@@ -1,5 +1,5 @@
 <template>
-<form v-on:submit.prevent=post method=POST action=/api/users>
+<form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/users>
   <h1 v-if=create>Create a new account</h1>
   <h1 v-if=update>My Account</h1>
   <h1 v-if=search>Account detail</h1>
@@ -72,10 +72,10 @@
   </ul>
   <p v-else>This user does not have any activities</p>
   <div class=fab>
-    <button v-if="create" title="Create">+</button>
-    <button v-if="update&&edit" title="Update">✓</button>
-    <button v-if="update&&edit" v-on:click.prevent="editmode=false" title="Cancel">✕</button>
+    <button v-if="create" title="Create">✓</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
+    <button v-if="update&&edit" v-on:click.prevent="editmode=false" title="Cancel">✕</button>
+    <button v-if="update&&edit" title="Update">✓</button>
   </div>
 	<Graph v-if="!edit" :id=this.id ></Graph>
 </form>
@@ -131,6 +131,9 @@ export default {
         .catch(err => this.$root.$refs.toast);
     },
     post($event) {
+      if(document.activeElement instanceof HTMLInputElement){
+        return $event.target[[].slice.call($event.target).findIndex(i=>i==document.activeElement)+1].focus()
+      }
       this.sfetch($event.target)
         .then(req => req.json())
         .then(r => {
