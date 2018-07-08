@@ -1,7 +1,8 @@
 <template>
 <ul>
 <li v-for="elem in values" :key=elem.id>
-	<input @keyup=inflate @focusout=deflate v-model=elem.title :placeholder=placeholder onsearch type=search :list=datalistId :name=name>
+	<input @keyup=inflate @focusout=deflate v-model=elem.title :placeholder=placeholder :list=datalistId :name=name>
+	<a v-if="values&&values.length" @click=remove(elem)>&times;</a>
 </li>
 <datalist :id=datalistId>
 	<option v-for="d in datalist" :key=d>{{d}}</option>
@@ -24,6 +25,9 @@ export default {
 		}
 	},
 	methods: {
+		remove(elem){
+			elem.title='';
+		},
 		deflate() {
 			let l = this.values;
 			let inputs = this.$el.querySelectorAll('input');
@@ -57,4 +61,12 @@ export default {
 };
 </script>
 <style scoped>
+li{
+	position:relative;
+}
+li a{
+	position:absolute;
+	right:.2em;
+	top:0;
+}
 </style>
