@@ -50,7 +50,7 @@ export default {
         .then(r => r.json())
         .then(users => this.graph(this.transform(users)));
     } else {
-      console.log("id : ", this.id);
+      //console.log("id : ", this.id);
       this.sfetch(`/api/user/${this.id}/proj`)
         .then(r => r.json())
         .then(users => this.graph(this.transform(users)));
@@ -64,7 +64,7 @@ export default {
         department_hash = {};
 
       users.forEach(user => {
-        nodes.push({ id: user._id, label: user.firstName, group: 1, level: 1 });
+        nodes.push({ id: user._id, label: user.firstName, group: 1, level: 1 , avatar: user.avatar});
         links.push({
           source: user._id,
           target: user.department,
@@ -199,7 +199,7 @@ export default {
         .append("image")
         .attr("xlink:href", function(d) {
           return [
-            "https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png",
+            d.avatar||"https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png",
             "http://www.iconninja.com/files/766/572/903/home-house-building-icon.svg",
             "https://theplantium.com/wp-content/uploads/2016/10/Knowledge-1.png"
           ][d.level - 1];

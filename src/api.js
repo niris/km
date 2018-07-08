@@ -27,7 +27,7 @@ api.get('/user', (req, res) => {
 
 api.get('/user/proj', (req, res) => {
 	db.collection('users')
-		.aggregate([{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1, knowledge: 1 } }]).toArray()
+		.aggregate([{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1, knowledge: 1, avatar: 1} }]).toArray()
 		.then(r => res.json(r))
 })
 api.get('/user/:_id', (req, res) => {
@@ -39,14 +39,19 @@ api.get('/user/:_id', (req, res) => {
 })
 api.get('/user/:_id/proj', (req, res) => { //a revoir
 	db.collection('users')
-		.aggregate([{ $match: { _id: req.params._id } }, { $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1 } }]).toArray()
+		.aggregate([
+			{ $match: { _id: req.params._id } },
+			{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1, avatar: 1} }
+		]).toArray()
 		.then(r1 => {
 			db.collection('users')
-				.aggregate([{ $unwind: '$domain' }, { $match: { $or: [{ department: r1[0].department }, { 'domain': { $in: r1[0].domain } }] } }, { $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: '$domain', knowledge: 1 } }, { $group: { '_id': { '_id': '$_id', 'firstName': '$firstName', 'lastName': '$lastName', 'department': '$department' }, 'domain': { '$push': '$domain' } } }]).toArray()
+				.aggregate([{ $unwind: '$domain' },
+					{ $match: { $or: [{ department: r1[0].department }, { domain: { $in: r1[0].domain||[] } }] } },
+					{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: '$domain', knowledge: 1, avatar: 1} },
+					{ $group: { _id: { _id: '$_id', firstName: '$firstName', lastName: '$lastName', department: '$department', avatar: '$avatar',}, domain: { $push: '$domain' } } }
+				]).toArray()
 				.then(r2 => {
-					r2 = r2.map(v => { v._id.domain = v.domain; return v._id })
-					//var r3= r1.concat(r2) //pas besoins sinon doublon
-					res.json(r2)
+					res.json(r2.map(v => { v._id.domain = v.domain; return v._id }))
 				})
 		})
 })

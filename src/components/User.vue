@@ -6,6 +6,13 @@
   <!-- create:{{create}} update:{{update}} search:{{search}} edit:{{edit}} -->
 
   <div class="grid-m-a" v-if=user>
+    <label>Avatar</label>
+    <div class=avatar>
+      <input name=avatar type=hidden>
+      <img id=preview :src="(user||{}).avatar||'data:image/gif;base64,R0lGODlhDgAOAIAAAICAgP///yH5BAEAAAEALAAAAAAOAA4AAAI'+(editmode?'XjI+py30AnIEyUAZzVlq364BfVJUmUwAAOw==':'bjI+JwKDX2otRUZkus3rSZ1TelWlbaGKpujoFADs=')">
+      <input type=file @change=thumb v-if=editmode>
+    </div>
+
     <label>First Name</label>
     <input v-if=edit name=firstName autocomplete=given-name :value=user.firstName>
     <p v-else>{{user.firstName}}</p>
@@ -61,16 +68,18 @@
     <input v-if=edit name=password type=password placeholder="unchanged" :value="''" autocomplete="current-password">
   </div>
 	<datalist id=suggests></datalist>
-  <h1>User's Activities</h1>
-  <ul v-if="user.activities && user.activities.length">
-    <li v-for="a in user.activities" :key=a._id>
-      <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
-      <form v-on:submit.prevent=activityDelete method=DELETE :action="'/api/activity/'+a._id" style="display:inline">
-        <button title="delete" style="padding: 0;width: 2em;">❌</button>
-      </form>
-    </li>
-  </ul>
-  <p v-else>This user does not have any activities</p>
+  <template v-if="!create">
+    <h1>User's Activities</h1>
+    <ul v-if="user.activities && user.activities.length">
+      <li v-for="a in user.activities" :key=a._id>
+        <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
+        <form v-on:submit.prevent=activityDelete method=DELETE :action="'/api/activity/'+a._id" style="display:inline">
+          <button title="delete" style="padding: 0;width: 2em;">❌</button>
+        </form>
+      </li>
+    </ul>
+    <p v-else>This user does not have any activities</p>
+  </template>
   <div class=fab>
     <button v-if="create" title="Create">✓</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
@@ -108,6 +117,18 @@ export default {
     this.load(this.id);
   },
   methods: {
+    thumb($event){
+      let img = document.createElement("img");
+      img.onload=function(){
+        let canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 256;
+        canvas.getContext('2d').drawImage(this, 0, 0, canvas.width, canvas.height);
+        let url = canvas.toDataURL('image/jpeg',.2);
+        document.getElementById('preview').src = url;
+        $event.target.form.avatar.value = url;
+      }
+      img.src = window.URL.createObjectURL($event.target.files[0]);
+    },
     md(text) {
       return text ? marked(text, { sanitize: true }) : "";
     },
@@ -180,5 +201,20 @@ export default {
 };
 </script>
 <style scoped>
-
+.avatar {
+  position:relative;
+}
+.avatar input[type=file]{
+  position: absolute;
+  left: 0;
+  width: 128px;
+  height: 128px;
+  opacity: 0;
+}
+.avatar img {
+  border-radius: 100%;
+  box-shadow: 0 0 .2em 0px;
+  width:128px;
+  height:128px;
+}
 </style>
