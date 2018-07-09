@@ -28,8 +28,6 @@ body {
     border-radius: 0.4em;
     padding: 1em 2em 2em 2em;
     margin: 2em auto;
-  /* width: calc(100vh);
-    min-height: calc(100vh);*/
   }
 }
 

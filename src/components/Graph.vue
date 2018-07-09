@@ -1,9 +1,6 @@
 <template>
 	<div>
-    <User id=sirin></User>
-    <svg id=graph></svg>
-		<div class = "sidebar" id=userDialog  style="display:none">
-      <button id="button-close" v-on:click=closeUserDialog>x</button><br>
+		<div class = "sidebar" id=userDialog  style="display:none" v-on:click=closeUserDialog>
       <div class="img-container">
 			<img src="https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png">
       </div>
@@ -32,6 +29,7 @@
       <router-link :to="'/user/'+ user._id"> More information</router-link>
       </div>
 		</div>
+    <svg id=graph></svg>
 	</div>
 </template>
 
@@ -64,7 +62,13 @@ export default {
         department_hash = {};
 
       users.forEach(user => {
-        nodes.push({ id: user._id, label: user.firstName, group: 1, level: 1 , avatar: user.avatar});
+        nodes.push({
+          id: user._id,
+          label: user.firstName,
+          group: 1,
+          level: 1,
+          avatar: user.avatar
+        });
         links.push({
           source: user._id,
           target: user.department,
@@ -102,60 +106,43 @@ export default {
     },
     graph({ nodes, links }) {
       var width = window.innerWidth,
-        height = window.innerHeight,
+        height = window.innerHeight*1.5,
         circleWidth = 10;
-      //TODO auto resize when change windows size
+
+      //window.addEventListener("resize", resize);
+
       var svg = d3
         .select("#graph")
-        //.attr("width", width)
-        //.attr("height", height);
-        // simulation setup with all forces
-        .attr("preserveAspectRatio", "xMinYMin meet")
-        .attr("viewBox", 0 + " " + 0 + " " + width + " " + height * 1.5)
-        .classed("svg-content-responsive", true);
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", 0 + " " + 0 + " " + width + " " + height )
+        //.attr("preserveAspectRatio", "xMidYMid meet")
+        //.classed("svg-content-responsive", true);
 
       var color = d3.scaleOrdinal([
-        "#1D3557",
+        "#2B2D42",
+        "#2B2D42",
+        "#972c02",
         "#66c2a5",
-        "#d11345",
         "#fc8d62",
-        "#8da0cb",
-        "#e78ac3",
-        "#ffd92f",
-        "#e5c494"
+        "#e78ac3"
       ]);
 
-      var font_size = [18, 32, 48];
-
+      var font_size = ["2em", "2em", "2.5em"];
+      var radius = 2;
       var linkForce = d3
         .forceLink()
         .id(l => l.id)
-        .strength(l => l.strenght);
+        .strength(l => l.strenght)
+        .distance(width * 0.15);
+
       var simulation = d3
         .forceSimulation()
         .force("link", linkForce)
-        .force(
-          "forceX",
-          d3
-            .forceX()
-            .strength(0.1)
-            .x(width * 0.5)
-        )
-        .force(
-          "forceY",
-          d3
-            .forceY()
-            .strength(0.1)
-            .y(height * 0.5)
-        )
-        .force(
-          "center",
-          d3
-            .forceCenter()
-            .x(width * 0.5)
-            .y(height * 0.5)
-        )
-        .force("charge", d3.forceManyBody().strength(-10000));
+        .force("charge", d3.forceManyBody().strength(-width))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("y", d3.forceY(0.01))
+        .force("x", d3.forceX(0.01));
 
       var dragDrop = d3
         .drag()
@@ -183,7 +170,6 @@ export default {
         .data(links)
         .enter()
         .append("line")
-        .attr("gravity", 0.05)
         .attr("stroke-width", 1)
         .attr("stroke", "rgba(50, 50, 50, 0.2)");
 
@@ -195,42 +181,40 @@ export default {
         .attr("class", "node")
         .call(dragDrop);
 
-      nodeElements
+      var defs = svg.append("defs");
+
+      defs
+        .selectAll(".node-pattern")
+        .data(nodes)
+        .enter()
+        .append("pattern")
+        .attr("id", d => {
+          return d.id.toLowerCase().replace(/ /g, "-");
+        })
+        .attr("height", "100%")
+        .attr("width", "100%")
+        .attr("patternContentUnits", "objectBoundingBox")
         .append("image")
+        .attr("height", 1)
+        .attr("width", 1)
         .attr("xlink:href", function(d) {
           return [
-            d.avatar||"https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png",
-            "http://www.iconninja.com/files/766/572/903/home-house-building-icon.svg",
-            "https://theplantium.com/wp-content/uploads/2016/10/Knowledge-1.png"
+            d.avatar ||
+              "https://image.flaticon.com/icons/png/512/149/149071.png",
+            "",
+            ""
           ][d.level - 1];
+        });
+
+      nodeElements
+        .append("circle")
+        .attr("r", "5%")
+        .attr("fill", d => {
+          return "url(#" + d.id.toLowerCase().replace(/ /g, "-") + ")";
         })
-        .attr("x", -60)
-        .attr("y", -60)
-        .attr("width", 100)
-        .attr("height", 100)
         .on("mouseover", mouseOver)
         .on("mouseout", mouseOut)
         .on("click", this.showpopup);
-
-      /*      const nodeElements = svg
-        .append("g")
-        .selectAll("circle")
-        .data(nodes)
-        .enter()
-        .append("circle")
-        .attr("r", getNodeSize)
-        .attr("fill", getNodeColor)
-        .on("mouseover", mouseOver)
-        .on("mouseout", mouseOut)
-        .on("click", this.showpopup)
-        .call(dragDrop)*/
-      //.append("image")
-      //attr("xlink:href", "https://github.com/favicon.ico")
-      //.attr("x", 50)
-      //.attr("y", 50)
-      //.attr("width", 100)
-      //.attr("height", 120)
-
       const textElements = svg
         .append("g")
         .selectAll("text")
@@ -239,34 +223,36 @@ export default {
         .append("text")
         .text(node => node.label)
         .attr("font-size", function(node) {
-          return [18, 32, 48][node.level - 1];
+          return font_size[node.level - 1];
         })
-        .attr("dx", -50)
-        .attr("dy", 75)
         .attr("font-weight", function(node) {
-          return ["lighter", 200, 500][node.level - 1];
+          return ["lighter", 700, 350][node.level - 1];
         })
         .attr("uid", function(node) {
           return node.id;
-        });
-
-      //.attr("text-anchor", "middle");
+        })
+        .attr("text-anchor", function(node) {
+          return ["start", "middle", "middle"][node.level - 1];
+        })
+        .attr("dy", d => {
+          if (d.level == 1) return height*0.075;
+        })
+        .attr("fill", function(node) {
+           return color(node.level);
+        })
+        .call(dragDrop)
+        .on("click", this.showpopup);
+      textElements.exit().remove();
 
       function mouseOver(n, i) {
-        d3
-          .select(this)
-          .transition()
-          .attr("x", function(d) {
-            return -90;
-          })
-          .attr("y", function(d) {
-            return -90;
-          })
-          .attr("height", 150)
-          .attr("width", 150)
-          .attr("cursor", function(d) {
-            if (d.level == "1") return "pointer";
-          });
+        if (n.level != 2) {
+          d3
+            .select(this)
+            .transition()
+            .attr("cursor", function(d) {
+              if (d.level == "1") return "pointer";
+            });
+        }
 
         var neighbors = getNeighbors(n);
         linkElements.attr("stroke", function(link) {
@@ -277,13 +263,9 @@ export default {
           return getLinkWidth(n, link);
         });
 
-        nodeElements.attr("fill", function(node) {
-          return getNodeColor(node, neighbors);
-        });
-
-        textElements.attr("fill", function(node) {
-          return getTextColor(node, neighbors);
-        });
+       // textElements.attr("fill", function(node) {
+       //   return getTextColor(node, neighbors);
+       // });
 
         textElements.attr("font-size", function(d) {
           return n.id == d.id ? "3em" : font_size[d.level - 1];
@@ -295,18 +277,19 @@ export default {
 
       function mouseOut(n) {
         //   console.log(node)
-        d3
-          .select(this)
-          .transition()
-          .attr("x", function(d) {
-            return -60;
-          })
-          .attr("y", function(d) {
-            return -60;
-          })
-          .attr("height", 100)
-          .attr("width", 100);
-
+        if (n.level != 2) {
+          d3
+            .select(this)
+            .transition()
+            .attr("x", function(d) {
+              return -width / 35;
+            })
+            .attr("y", function(d) {
+              return -width / 30;
+            })
+            .attr("height", "7.5%")
+            .attr("width", "7.5%");
+        }
         linkElements
           .attr("stroke-width", 1)
           .attr("stroke", "rgba(50, 50, 50, 0.2)");
@@ -314,6 +297,19 @@ export default {
         textElements.attr("font-size", function(d) {
           return font_size[d.level - 1];
         });
+      }
+
+      function resize() {
+          svg.attr("width", width).attr("height", height)
+            .attr("viewBox", 0 + " " + 0 + " " + width + " " + height )
+        .attr("preserveAspectRatio", "xMidYMid meet");
+        d3
+        .forceSimulation()
+        .force("link", linkForce)
+        .force("charge", d3.forceManyBody().strength(-width * 1.5))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("y", d3.forceY(0.01))
+        .force("x", d3.forceX(0.01));
       }
 
       function getNodeColor(node, neighbors) {
@@ -332,7 +328,7 @@ export default {
       }
 
       function getLinkWidth(node, link) {
-        return isNeighborLink(node, link) ? 5 : 1;
+        return isNeighborLink(node, link) ? 3 : 1;
       }
 
       function getTextColor(node, neighbors) {
@@ -373,7 +369,7 @@ export default {
       }
 
       simulation.nodes(nodes).on("tick", () => {
-        //  nodeElements.attr("transform", this.nodeTransform);
+       
         linkElements
           .attr("x1", function(link) {
             return link.source.x;
@@ -388,7 +384,18 @@ export default {
             return link.target.y;
           });
 
-        nodeElements.attr("cx", node => node.x).attr("cy", node => node.y);
+        //nodeElements.attr("cx", node => node.x).attr("cy", node => node.y);
+
+        nodeElements
+          .attr("cx", function(d) {
+            return (d.x = Math.max(radius, Math.min(width - radius, d.x)));
+          })
+          .attr("cy", function(d) {
+            return (d.y = Math.max(
+              radius,
+              Math.min(height - radius, d.y)
+            ));
+          });
 
         nodeElements.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
@@ -400,11 +407,7 @@ export default {
       });
 
       simulation.force("link").links(links);
-    } /*,
-
-     nodeTransform(d) {
-    return "translate(" + d.x + "," + d.y + ")";
-   }*/,
+    },
 
     showpopup(node) {
       if (node.level == 1) {
@@ -423,54 +426,81 @@ export default {
 };
 </script>
 <style scoped>
-#userDialog {
+.sidebar {
   position: fixed;
-  float: center;
+  float: left;
+  width: 30%;
+  height: auto;
+  z-index: 1;
+  background-color: #1d3557;
+  top: 6em;
+  bottom: 2em;
+  left: 0%;
+}
+
+.sidenbar a:hover {
+  color: #f1f1f1;
 }
 
 #button-close {
-  position: absolute;
-  top: 5px;
-  right: 0px;
+  position: relative;
+  top: 1%;
+  right: -1%;
   background-color: rgb(84, 106, 136);
 }
 
 .router a {
-  position: absolute;
-  bottom: 5%;
-  right: 50px;
+  position: relative;
+  bottom: -10%;
+  right: -50%;
   color: rgb(231, 234, 236);
+  font-size: 1.5vw;
 }
 
 .img-container {
   position: relative;
+  width: 45%;
+  height: auto;
   margin: auto;
-  width: 200px;
-  height: 120px;
-  margin-bottom: 150px;
+  z-index: 1;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 /* resize images */
 .img-container img {
-  width: 100%;
   height: auto;
+  width: 100%;
 }
 
 dl {
-  position: absolute;
+  position: relative;
   width: 100%;
   overflow: hidden;
   padding: 0;
   margin: 0;
-  line-height: 2.5;
+  line-height: 1.5em;
+  font-size: 1.5vw;
 }
+
+@media screen and (min-width: 700px) {
+  dl {
+    font-size: 1em;
+  }
+
+  .router a{
+font-size: 1em;
+
+  }
+}
+
 dt {
-  position : relative;
+  position: relative;
   float: left;
   clear: left;
   width: 45%;
   color: rgb(231, 234, 236);
-  text-indent: 25px;
+  text-indent: 1%;
   font-weight: bold;
 }
 dd {
@@ -484,33 +514,13 @@ dd:after {
   white-space: pre;
 }
 
-.sidebar {
-  height: 88%;
-  width: 30%;
-  position: relative;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #1d3557;
-  margin-top: 5%;
-  margin-right :1%;
-}
-
-.sidenbar a:hover {
-  color: #f1f1f1;
-}
-
 #graph {
   position: relative;
   width: 100%;
+  height: 100%;
   vertical-align: center;
-  overflow: auto;
-}
-
-g.links {
-  position: relative;
-  width: 100%;
-  height: 50%;
+  overflow: inherit;
+  padding: 2em 1em 1em 1em;
 }
 
 </style>
