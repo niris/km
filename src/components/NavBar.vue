@@ -14,20 +14,16 @@
 		</a>
 		<router-link to=/>Experts lookup</router-link>
 		<router-link v-if=this.$root.token to=/activity>New Activity</router-link>
+		<router-link v-if=!this.$root.token to=/user>Sign Up</router-link>
 		<template v-if=this.$root.token>
 			<router-link :to="{name:'User', params:{id:this.$root.me}}">{{this.$root.me}}</router-link>
-			<button v-on:click=logout title="Sign Out">
-
-<svg xmlns="http://www.w3.org/2000/svg" width="22px" height="16px" viewBox="-4 0 32 32"><path d="m 18,24 0,4 -14,0 0,-24 14,0 0,4 4,0 0,-8 -22,0 0,32 22,0 0,-8 z m -6,-4.003 0,-8 12,0 0,-4 8,8 -8,8 0,-4 z" /></svg>
-
-      </button>
+			<button v-on:click=logout title="Sign Out"><svg xmlns="http://www.w3.org/2000/svg" width="22px" height="16px" viewBox="-4 0 32 32"><path d="m 18,24 0,4 -14,0 0,-24 14,0 0,4 4,0 0,-8 -22,0 0,32 22,0 0,-8 z m -6,-4.003 0,-8 12,0 0,-4 8,8 -8,8 0,-4 z" /></svg></button>
 		</template>
 		<form v-else v-on:submit.prevent="login($event.target)" method=POST action=/api/token>
 			<input placeholder=👤 name=_id autocomplete="username">
 			<input placeholder=🔑 name=password type=password autocomplete="current-password">
-			<button title="Sign In">⟶⃞</button>
+			<button title="Sign In"><svg xmlns="http://www.w3.org/2000/svg" width="22px" height="16px" viewBox="-4 0 32 32"><path d="m 14,24 v 4 H 28 V 4 H 14 V 8 H 10 V 0 H 32 V 32 H 10 V 24 Z M 6,20 V 12 H 18 V 8 l 8,8 -8,8 v -4 z" /></svg></button>
 		</form>
-		<router-link v-if=!this.$root.token to=/user>Sign Up</router-link>
 	</nav>
 </template>
 

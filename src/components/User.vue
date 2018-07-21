@@ -8,7 +8,17 @@
   <div class=avatar v-if=user>
     <input name=avatar type=hidden>
     <img id=preview :src="(user||{}).avatar||'data:image/gif;base64,R0lGODlhDgAOAIAAAICAgP///yH5BAEAAAEALAAAAAAOAA4AAAI'+(editmode?'XjI+py30AnIEyUAZzVlq364BfVJUmUwAAOw==':'bjI+JwKDX2otRUZkus3rSZ1TelWlbaGKpujoFADs=')">
-    <input type=file @change=thumb v-if=editmode>
+    <input type=file @change=thumb v-if=edit id=avatarFile>
+    <details hidden>
+      <summary>Image Position</summary>
+      <div class="grid-m-a imgedit">
+      <label>Horizontal</label><input type=range @change=thumb id=leftcrop min=0 max=.5 step=.01 value=0 style="direction:rtl" />
+      <label>Vertical</label><input type=range @change=thumb id=topcrop min=0 max=.5 step=.01 value=0 style="direction:rtl" />
+      <label>Width</label><input type=range @change=thumb id=rightcrop min=.5 max=1 step=.01 value=1 style="direction:rtl" />
+      <label>Height</label><input type=range @change=thumb id=bottomcrop min=.5 max=1 step=.01 value=1 style="direction:rtl" />
+      </div>
+    </details>
+
   </div>
   <div class="grid-m-a" v-if=user>
     <label>First Name</label>
@@ -91,10 +101,11 @@
 import Graph from "@/components/Graph";
 import TagList from "@/components/TagList";
 export default {
-  components: { Graph, TagList},
+  components: { Graph, TagList },
   props: ["id"],
   data: () => ({
     editmode: false,
+
     user: {}
   }),
   computed: {
@@ -115,17 +126,23 @@ export default {
     this.load(this.id);
   },
   methods: {
-    thumb($event){
+    thumb($event) {
+      let input = document.getElementById("avatarFile");
+      document.querySelector("details").hidden = !input.files.length;
+      if(!input.files.length)return;
       let img = document.createElement("img");
-      img.onload=function(){
+      img.onload = function() {
         let canvas = document.createElement("canvas");
         canvas.width = canvas.height = 256;
-        canvas.getContext('2d').drawImage(this, 0, 0, canvas.width, canvas.height);
-        let url = canvas.toDataURL('image/jpeg',.2);
-        document.getElementById('preview').src = url;
-        $event.target.form.avatar.value = url;
-      }
-      img.src = window.URL.createObjectURL($event.target.files[0]);
+        //rightcrop 0.5-1  bottomcrop 0.5-1
+        canvas
+          .getContext("2d")
+          .drawImage(this, this.width*leftcrop.value, this.height*topcrop.value, this.width*rightcrop.value, this.height*bottomcrop.value, 0, 0, canvas.width, canvas.height);
+        let url = canvas.toDataURL("image/jpeg", 0.2);
+        document.getElementById("preview").src = url;
+        input.form.avatar.value = url;
+      };
+      img.src = window.URL.createObjectURL(input.files[0]);
     },
     md(text) {
       return text ? marked(text, { sanitize: true }) : "";
@@ -133,16 +150,20 @@ export default {
     autocomplete(event) {
       var name = event.target.name.match(/\w+/)[0];
       var value = event.target.value;
-      this.sfetch('/api/user',{[name]:value})
-      .then(r=>r.json()).then(users => {
-        var val = [...new Set([].concat(...users.map(u => u[name])))].filter(m => m.match(value) && value != m);
-        var el = document.getElementById('suggests');
-        el.innerHTML=val?val.map(s=>'<option>'+s+'</option>'):'';
-        console.log(val, el.innerHTML)
-      }).catch(console.error)
+      this.sfetch("/api/user", { [name]: value })
+        .then(r => r.json())
+        .then(users => {
+          var val = [...new Set([].concat(...users.map(u => u[name])))].filter(
+            m => m.match(value) && value != m
+          );
+          var el = document.getElementById("suggests");
+          el.innerHTML = val ? val.map(s => "<option>" + s + "</option>") : "";
+          //console.log(val, el.innerHTML);
+        })
+        .catch(console.error);
     },
     load(id) {
-      this.user = {domain:[],publications:[],knowledge:[]};
+      this.user = { domain: [], publications: [], knowledge: [] };
       if (!id) return;
       this.sfetch(`/api/user/${id}`)
         .then(res => res.json())
@@ -150,8 +171,12 @@ export default {
         .catch(err => this.$root.$refs.toast);
     },
     post($event) {
-      if(document.activeElement instanceof HTMLInputElement){
-        return $event.target[[].slice.call($event.target).findIndex(i=>i==document.activeElement)+1].focus()
+      if (document.activeElement instanceof HTMLInputElement) {
+        return $event.target[
+          [].slice
+            .call($event.target)
+            .findIndex(i => i == document.activeElement) + 1
+        ].focus();
       }
       this.sfetch($event.target)
         .then(req => req.json())
@@ -188,7 +213,7 @@ export default {
         .attr("width", width)
         .attr("height", height);
       // simulation setup with all forces
-      console.log(nodes, links);
+      //console.log(nodes, links);
     }
   },
   watch: {
@@ -199,23 +224,31 @@ export default {
 };
 </script>
 <style scoped>
-h1{text-align: center}
+h1 {
+  text-align: center;
+}
 .avatar {
   text-align: center;
-  position:relative;
+  position: relative;
 }
-.avatar input[type=file]{
+.avatar input[type="file"] {
   position: absolute;
   left: 0;
   width: 100%;
   height: 256px;
   opacity: 0;
-  cursor:pointer;
+  cursor: pointer;
 }
 .avatar img {
   border-radius: 100%;
-  box-shadow: 0 0 .2em 0px;
-  width:256px;
-  height:256px;
+  box-shadow: 0 0 0.2em 0px;
+  width: 256px;
+  height: 256px;
+}
+.imgedit {
+  background: #F4F4F4;
+  box-shadow: 0 0.05em 0.3em inset;
+  padding: 0 1em;
+  border-radius: .3em;
 }
 </style>
