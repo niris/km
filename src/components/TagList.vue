@@ -27,6 +27,7 @@ export default {
 	methods: {
 		remove(elem){
 			elem.title='';
+			this.deflate();
 		},
 		deflate() {
 			let l = this.values;

@@ -1,15 +1,16 @@
 <template>
 <form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/users>
-  <h1 v-if=create>Create a new account</h1>
-  <h1 v-if=update>My Account</h1>
-  <h1 v-if=search>Account detail</h1>
-  <!-- create:{{create}} update:{{update}} search:{{search}} edit:{{edit}} -->
+  <template v-if=!summary>
+    <h1 v-if=create>Create a new account</h1>
+    <h1 v-if=update>My Account</h1>
+    <h1 v-if=search>Account detail</h1>
+  </template>
 
   <div class=avatar v-if=user>
-    <input name=avatar type=hidden>
-    <img id=preview :src="(user||{}).avatar||'data:image/gif;base64,R0lGODlhDgAOAIAAAICAgP///yH5BAEAAAEALAAAAAAOAA4AAAI'+(editmode?'XjI+py30AnIEyUAZzVlq364BfVJUmUwAAOw==':'bjI+JwKDX2otRUZkus3rSZ1TelWlbaGKpujoFADs=')">
-    <input type=file @change=thumb v-if=edit id=avatarFile>
-    <details hidden>
+    <input name=avatar type=hidden :value="avatar||user.avatar||''">
+    <img :src="avatar||user.avatar||'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='" :style="'background-image:url(data:image/gif;base64,R0lGODlhDgAOAIAAAICAgP///yH5BAEAAAEALAAAAAAOAA4AAAI'+(editmode?'XjI+py30AnIEyUAZzVlq364BfVJUmUwAAOw==':'bjI+JwKDX2otRUZkus3rSZ1TelWlbaGKpujoFADs=')+')'">
+    <input type=file @change=thumb v-if=edit>
+    <details v-if=edit hidden>
       <summary>Image Position</summary>
       <div class="grid-m-a imgedit">
       <label>Horizontal</label><input type=range @change=thumb id=leftcrop min=0 max=.5 step=.01 value=0 style="direction:rtl" />
@@ -18,8 +19,8 @@
       <label>Height</label><input type=range @change=thumb id=bottomcrop min=.5 max=1 step=.01 value=1 style="direction:rtl" />
       </div>
     </details>
-
   </div>
+
   <div class="grid-m-a" v-if=user>
     <label>First Name</label>
     <input v-if=edit name=firstName autocomplete=given-name :value=user.firstName>
@@ -37,13 +38,14 @@
     <input v-if=edit name=department autocomplete=organization :value=user.department>
     <p v-else>{{user.department}}</p>
     
-    <label>Working Since</label>
-    <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" :value=user.startwork>
-    <p v-else>{{user.startwork}}</p>
-    
     <label>Function</label>
     <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title :value=user.function list=suggests />
     <p v-else>{{user.function}}</p>
+    
+    <template v-if="!summary">
+    <label>Working Since</label>
+    <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" :value=user.startwork>
+    <p v-else>{{user.startwork}}</p>
     
     <label>Telephone</label>
     <input v-if=edit name=phone type=tel autocomplete="tel-national" :value=user.phone>
@@ -60,6 +62,7 @@
     <label>Publications</label>
     <TagList v-if=edit :list=user.publications placeholder="New Publication..." from="/api/user" name="publications[]"></TagList>
     <ul v-else><li v-for="u in user.publications" :key=u>{{u}}</li></ul>
+    </template>
     
     <label>Major Expertises</label>
     <TagList v-if=edit :list=user.domain class=tags placeholder="New Domain..." from="/api/user" name="domain[]"></TagList>
@@ -76,7 +79,7 @@
     <input v-if=edit name=password type=password placeholder="unchanged" :value="''" autocomplete="current-password">
   </div>
 	<datalist id=suggests></datalist>
-  <template v-if="!create">
+  <template v-if="!create && !summary">
     <h1>User's Activities</h1>
     <ul v-if="user.activities && user.activities.length">
       <li v-for="a in user.activities" :key=a._id>
@@ -88,13 +91,13 @@
     </ul>
     <p v-else>This user does not have any activities</p>
   </template>
-  <div class=fab>
+  <div class=fab v-if="!summary">
     <button v-if="create" title="Create">✓</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
-    <button v-if="update&&edit" v-on:click.prevent="editmode=false" title="Cancel">✕</button>
+    <button v-if="update&&edit" v-on:click.prevent="editmode=avatar=false" title="Cancel">✕</button>
     <button v-if="update&&edit" title="Update">✓</button>
   </div>
-	<Graph v-if="!edit" :id=this.id ></Graph>
+	<Graph v-if="!edit&&!summary" :id=this.id ></Graph>
 </form>
 </template>
 <script>
@@ -102,10 +105,11 @@ import Graph from "@/components/Graph";
 import TagList from "@/components/TagList";
 export default {
   components: { Graph, TagList },
-  props: ["id"],
+  props: ["id", "summary"],
   data: () => ({
     editmode: false,
-
+    img: null,
+    avatar: null,
     user: {}
   }),
   computed: {
@@ -124,25 +128,33 @@ export default {
   },
   created() {
     this.load(this.id);
+    this.img = document.createElement("img");
+    this.img.onload = () => {
+      this.$el.querySelector("details").hidden = false;
+      let canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 256;
+      canvas
+        .getContext("2d")
+        .drawImage(
+          this.img,
+          this.img.width * leftcrop.value,
+          this.img.height * topcrop.value,
+          this.img.width * rightcrop.value,
+          this.img.height * bottomcrop.value,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+      this.avatar = canvas.toDataURL("image/jpeg", 0.2);
+    };
   },
   methods: {
     thumb($event) {
-      let input = document.getElementById("avatarFile");
-      document.querySelector("details").hidden = !input.files.length;
-      if(!input.files.length)return;
-      let img = document.createElement("img");
-      img.onload = function() {
-        let canvas = document.createElement("canvas");
-        canvas.width = canvas.height = 256;
-        //rightcrop 0.5-1  bottomcrop 0.5-1
-        canvas
-          .getContext("2d")
-          .drawImage(this, this.width*leftcrop.value, this.height*topcrop.value, this.width*rightcrop.value, this.height*bottomcrop.value, 0, 0, canvas.width, canvas.height);
-        let url = canvas.toDataURL("image/jpeg", 0.2);
-        document.getElementById("preview").src = url;
-        input.form.avatar.value = url;
-      };
-      img.src = window.URL.createObjectURL(input.files[0]);
+      let input = this.$el.querySelector(".avatar [type=file]");
+      if (input.files.length)
+        this.img.src = window.URL.createObjectURL(input.files[0]);
+      else if (this.img.src) this.img.onload();
     },
     md(text) {
       return text ? marked(text, { sanitize: true }) : "";
@@ -244,11 +256,12 @@ h1 {
   box-shadow: 0 0 0.2em 0px;
   width: 256px;
   height: 256px;
+  background-size: contain;
 }
 .imgedit {
-  background: #F4F4F4;
+  background: #f4f4f4;
   box-shadow: 0 0.05em 0.3em inset;
   padding: 0 1em;
-  border-radius: .3em;
+  border-radius: 0.3em;
 }
 </style>

@@ -1,46 +1,23 @@
 <template>
-	<div>
-		<div class = "sidebar" id=userDialog  style="display:none" v-on:click=closeUserDialog>
-      <div class="img-container">
-			<img src="https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png">
-      </div>
-      <dl>
-  			<dt>First name : </dt>
-  				<dd>{{user.firstName}}</dd>
-  			<dt>Last name : </dt>
-  				<dd>{{user.lastName}}</dd>
-				<dt>Function : </dt>
-  				<dd>{{user.fonction}}</dd>
-				<dt>Department : </dt>
-  				<dd>{{user.department}}</dd>
-				<dt>Expert domain : </dt>
-          <dd><ul class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul></dd>
-           <!--!<dd>{{user.domain}}</dd> -->
-				<dt>Knowledge : </dt>
-          <dd><ul class=tags><li v-for="u in user.Knowledge" :key=u>{{u}}</li></ul></dd>
-       <!-- <dt>Publications : </dt>
-         <dd v-for="u in user.publications" :key=u>{{u}}</dd>
-          <dd><ul><li v-for="u in user.publications" :key=u>{{u}}</li></ul></dd>
-        -->
-				 <dt>Contact : </dt>
-  				<dd>{{user.email}}</dd>
-			</dl>
-      <div class="router">
-      <router-link :to="'/user/'+ user._id"> More information</router-link>
-      </div>
-		</div>
+  <div>
+    <aside class="sidebar" id=userDialog hidden>
+      <nav>
+        <router-link :to="'/user/'+ user._id">Go to Profil</router-link>
+        <button v-on:click=closeUserDialog>close</button>
+      </nav>
+      <User :id=user._id summary=true></User>
+    </aside>
     <svg id=graph></svg>
 	</div>
 </template>
 
 <script>
-//import User from "@/components/User";
+import User from "@/components/User";
 export default {
-  //components: { User },
+  components: { User },
   props: ["id"],
   data: () => ({
-    user: {},
-    img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png"
+    user: {}
   }),
   mounted() {
     this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
@@ -119,7 +96,7 @@ export default {
           .attr("height", height)
           .attr("viewBox", `0 0 ${width} ${height}`);
       });
-      
+
       var color = d3.scaleOrdinal([
         "#2B2D42",
         "#2B2D42",
@@ -130,7 +107,7 @@ export default {
       ]);
 
       var font_size = ["1em", "1em", "1.2em"];
-      var radius = 2;// USELESS !!
+      var radius = 2; // USELESS !!
       var linkForce = d3
         .forceLink()
         .id(l => l.id)
@@ -182,7 +159,8 @@ export default {
         .attr("class", "node")
         .call(dragDrop);
 
-      var defs = svg.append("defs")
+      var defs = svg
+        .append("defs")
         .selectAll(".node-pattern")
         .data(nodes)
         .enter()
@@ -194,7 +172,9 @@ export default {
         .append("image")
         .attr("height", 1)
         .attr("width", 1)
-        .attr("xlink:href", d =>
+        .attr(
+          "xlink:href",
+          d =>
             [
               d.avatar ||
                 "https://image.flaticon.com/icons/png/512/149/149071.png",
@@ -395,102 +375,41 @@ export default {
           .then(r => r.json())
           .then(json => {
             this.user = json;
-            userDialog.style.display = "block";
+            userDialog.hidden = false;
           });
       }
     },
     closeUserDialog() {
-      userDialog.style.display = "none";
+      userDialog.hidden = true;
     }
   }
 };
 </script>
 <style scoped>
-.sidebar {
-  position: fixed;
-  float: left;
-  width: 30%;
-  height: auto;
-  z-index: 1;
-  background-color: #1d3557;
-  top: 6em;
-  bottom: 2em;
-  left: 0%;
-}
-
-.sidenbar a:hover {
-  color: #f1f1f1;
-}
-
-#button-close {
-  position: relative;
-  top: 1%;
-  right: -1%;
-  background-color: rgb(84, 106, 136);
-}
-
-.router a {
-  position: relative;
-  bottom: -10%;
-  right: -50%;
-  color: rgb(231, 234, 236);
-  font-size: 1.5vw;
-}
-
-.img-container {
-  position: relative;
-  width: 45%;
-  height: auto;
-  margin: auto;
-  z-index: 1;
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-/* resize images */
-.img-container img {
-  height: auto;
-  width: 100%;
-}
-
-dl {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  padding: 0;
+aside {
   margin: 0;
-  line-height: 1.5em;
-  font-size: 1.5vw;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 80vw;
+  max-width:400px;
+  z-index: 1;
+  padding: 10em 0 0 0;
+  background: rgba(255, 255, 255, 0.9);
+  overflow: scroll;
+  box-shadow: black 0 0 1em;
+}
+aside nav {
+  position: absolute;
+  top: 6em;
+  right: 1em;
 }
 
-@media screen and (min-width: 700px) {
-  dl {
-    font-size: 1em;
-  }
-
-  .router a {
-    font-size: 1em;
-  }
-}
-
-dt {
-  position: relative;
-  float: left;
-  clear: left;
-  width: 45%;
-  color: rgb(231, 234, 236);
-  text-indent: 1%;
-  font-weight: bold;
-}
-dd {
-  width: 65%;
-  margin-left: 45%;
-  color: rgb(231, 234, 236);
-}
-
-dd:after {
-  content: "\a";
-  white-space: pre;
+@media (max-width: 960px) {
+	.fab {
+		right: 0.5em;
+	}
 }
 
 #graph {
