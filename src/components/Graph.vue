@@ -83,9 +83,13 @@ export default {
         .select("#graph")
         .attr("width", width)
         .attr("height", height)
-        .attr("viewBox", `0 0 ${width} ${height}`);
-      //.attr("preserveAspectRatio", "xMidYMid meet")
-      //.classed("svg-content-responsive", true);
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .call(
+          d3.zoom().on("zoom", function() {
+            svg.attr("transform", d3.event.transform);
+          })
+        )
+        .append("g");
 
       window.addEventListener("resize", function() {
         var elem = document.querySelector("#graph");
@@ -142,14 +146,17 @@ export default {
         });
 
       var linkElements = svg
-        .append("g")
-        .attr("class", "links")
         .selectAll("line")
         .data(links)
         .enter()
-        .append("line")
-        .attr("stroke-width", 1)
-        .attr("stroke", "rgba(50, 50, 50, 0.2)");
+        .append("path")
+        .attr("class", "links")
+        .attr("stroke", "rgba(50, 50, 50, 0.2)")
+        .attr("stroke-width", "1px");
+
+      linkElements
+        .style("fill", "none")
+        
 
       var nodeElements = svg
         .selectAll(".node")
@@ -185,7 +192,7 @@ export default {
 
       nodeElements
         .append("circle")
-        .attr("r", n => (n.level == 1 ? "5%" : "0"))
+        .attr("r", n => (n.level == 1 ? "3%" : "0"))
         .attr(
           "fill",
           d => "url(#" + d.id.toLowerCase().replace(/ /g, "-") + ")"
@@ -193,6 +200,7 @@ export default {
         .on("mouseover", mouseOver)
         .on("mouseout", mouseOut)
         .on("click", this.showpopup);
+
       const textElements = svg
         .append("g")
         .selectAll("text")
@@ -220,6 +228,7 @@ export default {
         })
         .call(dragDrop)
         .on("click", this.showpopup);
+      
       textElements.exit().remove();
 
       function mouseOver(n, i) {
@@ -233,6 +242,7 @@ export default {
         }
 
         var neighbors = getNeighbors(n);
+
         linkElements.attr("stroke", function(link) {
           return getLinkColor(n, link);
         });
@@ -288,7 +298,7 @@ export default {
       }
 
       function getLinkColor(node, link) {
-        return isNeighborLink(node, link) ? "#1D3557" : "#E5E5E5";
+        return isNeighborLink(node, link) ? "#c1c1d7" : "#E5E5E5";
       }
 
       function getLinkWidth(node, link) {
@@ -334,7 +344,7 @@ export default {
 
       simulation.nodes(nodes).on("tick", () => {
         linkElements
-          .attr("x1", function(link) {
+          /* .attr("x1", function(link) {
             return link.source.x;
           })
           .attr("y1", function(link) {
@@ -345,9 +355,29 @@ export default {
           })
           .attr("y2", function(link) {
             return link.target.y;
+          })*/
+          //.attr("d", "M0,-5L10,0L0,5");
+          .attr("d", function(d) {
+            var dx = d.target.x - d.source.x,
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy);
+            return (
+              "M" +
+              d.source.x +
+              "," +
+              d.source.y +
+              "A" +
+              dr +
+              "," +
+              dr +
+              " 0 0,1 " +
+              d.target.x +
+              "," +
+              d.target.y
+            );
           });
 
-        //nodeElements.attr("cx", node => node.x).attr("cy", node => node.y);
+        //nodeElements.attr("cx", node => node.x).attr("cy", node => node.y)
 
         nodeElements
           .attr("cx", function(d) {
@@ -393,7 +423,7 @@ aside {
   bottom: 0;
   left: 0;
   width: 80vw;
-  max-width:400px;
+  max-width: 400px;
   z-index: 1;
   padding: 10em 0 0 0;
   background: rgba(255, 255, 255, 0.9);
@@ -407,9 +437,9 @@ aside nav {
 }
 
 @media (max-width: 960px) {
-	.fab {
-		right: 0.5em;
-	}
+  .fab {
+    right: 0.5em;
+  }
 }
 
 #graph {
@@ -420,4 +450,5 @@ aside nav {
   overflow: hidden;
   padding: 0;
 }
+
 </style>
