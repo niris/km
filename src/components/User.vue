@@ -100,18 +100,23 @@
 	<Graph v-if="!edit&&!summary" :id=this.id ></Graph>
 </form>
 </template>
+
 <script>
 import Graph from "@/components/Graph";
 import TagList from "@/components/TagList";
+
 export default {
+
   components: { Graph, TagList },
   props: ["id", "summary"],
+  
   data: () => ({
     editmode: false,
     img: null,
     avatar: null,
     user: {}
   }),
+  
   computed: {
     edit: function() {
       return this.create || this.editmode;
@@ -126,6 +131,7 @@ export default {
       return this.id && !this.$root.token.startsWith(this.id);
     }
   },
+  
   created() {
     this.load(this.id);
     this.img = document.createElement("img");
@@ -149,6 +155,7 @@ export default {
       this.avatar = canvas.toDataURL("image/jpeg", 0.2);
     };
   },
+  
   methods: {
     thumb($event) {
       let input = this.$el.querySelector(".avatar [type=file]");

@@ -2,10 +2,11 @@
   <div>
     <aside class="sidebar" id=userDialog hidden>
       <nav>
-        <router-link :to="'/user/'+ user._id">Go to Profil</router-link>
-        <button v-on:click=closeUserDialog>close</button>
+        <button v-on:click=closeUserDialog>x</button>
       </nav>
       <User :id=user._id summary=true></User>
+      <router-link :to="'/user/'+ user._id" tag="button">ไปที่ Profil</router-link>
+
     </aside>
     <svg id=graph></svg>
 	</div>
@@ -22,10 +23,15 @@ export default {
   mounted() {
     this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
       .then(r => r.json())
-      .then(users => this.graph(this.transform(users)));
+      .then(users =>
+        this.graph(
+          this.id ? this.transform(users, true) : this.transform(users, false)
+        )
+      );
   },
+
   methods: {
-    transform(users) {
+    transform(users, ego) {
       var nodes = [],
         links = [],
         domains_hash = {},
@@ -39,14 +45,25 @@ export default {
           level: 1,
           avatar: user.avatar
         });
-        links.push({
-          source: user._id,
-          target: user.department,
-          relation: "work",
-          strenght: 1
-        });
+        if (ego) {
+          links.push({
+            source: user._id,
+            target: user.department,
+            relation: "work",
+            strenght: 1
+          });
+
+          department_hash[user.department] = true;
+          links.push({
+            source: user._id,
+            target: user.department,
+            relation: "work",
+            strenght: 1
+          });
+        }
         if (user.domain.constructor == String)
           user.domain = user.domain.split(/\n/); // TODO REMOVE
+
         user.domain.forEach(d => {
           domains_hash[d] = true;
           links.push({
@@ -56,28 +73,25 @@ export default {
             strenght: 1
           });
         });
-
-        department_hash[user.department] = true;
-        links.push({
-          source: user._id,
-          target: user.department,
-          relation: "work",
-          strenght: 1
-        });
       });
+
       Object.keys(domains_hash).forEach(d =>
         nodes.push({ id: d, label: d, group: 3, level: 3 })
       );
-      Object.keys(department_hash).forEach(d =>
-        nodes.push({ id: d, label: d, group: 2, level: 2 })
-      );
-      //console.log(domains_hash.keys, department_hash.keys, nodes, links);
+
+      if (ego) {
+        Object.keys(department_hash).forEach(d =>
+          nodes.push({ id: d, label: d, group: 2, level: 2 })
+        );
+      }
+
       return { nodes, links };
     },
+
     graph({ nodes, links }) {
       var elem = document.querySelector("#graph");
       var width = elem.clientWidth,
-        height = elem.clientHeight;
+          height = elem.clientHeight;
 
       var svg = d3
         .select("#graph")
@@ -154,9 +168,7 @@ export default {
         .attr("stroke", "rgba(50, 50, 50, 0.2)")
         .attr("stroke-width", "1px");
 
-      linkElements
-        .style("fill", "none")
-        
+      linkElements.style("fill", "none");
 
       var nodeElements = svg
         .selectAll(".node")
@@ -201,7 +213,7 @@ export default {
         .on("mouseout", mouseOut)
         .on("click", this.showpopup);
 
-      const textElements = svg
+      var textElements = svg
         .append("g")
         .selectAll("text")
         .data(nodes)
@@ -221,14 +233,17 @@ export default {
           return ["start", "middle", "middle"][node.level - 1];
         })
         .attr("dy", d => {
-          if (d.level == 1) return height * 0.075;
+          if (d.level == 1) return height * 0.045;
+        })
+        .attr("dx", d => {
+          if (d.level == 1) return width * -0.025;
         })
         .attr("fill", function(node) {
           return color(node.level);
         })
         .call(dragDrop)
         .on("click", this.showpopup);
-      
+
       textElements.exit().remove();
 
       function mouseOver(n, i) {
@@ -242,7 +257,6 @@ export default {
         }
 
         var neighbors = getNeighbors(n);
-
         linkElements.attr("stroke", function(link) {
           return getLinkColor(n, link);
         });
@@ -256,7 +270,7 @@ export default {
         // });
 
         textElements.attr("font-size", function(d) {
-          return n.id == d.id ? "3em" : font_size[d.level - 1];
+          return n.id == d.id ? "1.5em" : font_size[d.level - 1];
         });
 
         //CIRCLE
@@ -286,6 +300,7 @@ export default {
           return font_size[d.level - 1];
         });
       }
+
       function getNodeColor(node, neighbors) {
         /* if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
           return node.level == 1 ? "black" : "blue";
@@ -310,6 +325,7 @@ export default {
           ? "#1D3557"
           : "black";
       }
+      
       //neighbours
       function getNeighbors(node) {
         return links.reduce(
@@ -343,8 +359,26 @@ export default {
       }
 
       simulation.nodes(nodes).on("tick", () => {
-        linkElements
-          /* .attr("x1", function(link) {
+        linkElements.attr("d", function(d) {
+          var dx = d.target.x - d.source.x,
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy);
+          return (
+            "M" +
+            d.source.x +
+            "," +
+            d.source.y +
+            "A" +
+            dr +
+            "," +
+            dr +
+            " 0 0,1 " +
+            d.target.x +
+            "," +
+            d.target.y
+          );
+        });
+        /* .attr("x1", function(link) {
             return link.source.x;
           })
           .attr("y1", function(link) {
@@ -356,27 +390,6 @@ export default {
           .attr("y2", function(link) {
             return link.target.y;
           })*/
-          //.attr("d", "M0,-5L10,0L0,5");
-          .attr("d", function(d) {
-            var dx = d.target.x - d.source.x,
-              dy = d.target.y - d.source.y,
-              dr = Math.sqrt(dx * dx + dy * dy);
-            return (
-              "M" +
-              d.source.x +
-              "," +
-              d.source.y +
-              "A" +
-              dr +
-              "," +
-              dr +
-              " 0 0,1 " +
-              d.target.x +
-              "," +
-              d.target.y
-            );
-          });
-
         //nodeElements.attr("cx", node => node.x).attr("cy", node => node.y)
 
         nodeElements
@@ -436,7 +449,7 @@ aside nav {
   right: 1em;
 }
 
-@media (max-width: 960px) {
+@media screen and (max-width: 960px) {
   .fab {
     right: 0.5em;
   }
