@@ -10,7 +10,7 @@
 			<path fill="#ffffff" stroke-width="0" stroke-opacity="null" fill-opacity="null" d="m90.000002,191.863804l37.999954,-17.188427l38.000044,17.188427l-14.514659,27.811576l-46.970636,0l-14.514703,-27.811576z" id="svg_8" stroke="#bfbf00"/>
 			<path fill="#ffffff" stroke-width="0" stroke-opacity="null" fill-opacity="null" d="m97,88.520624l31.000001,-55l31.000001,55l-62.000002,0z" id="svg_9" stroke="#bfbf00"/>
 			</g>
-			</svg>RERU
+			</svg>KM
 		</a>
 		<router-link to=/>Experts lookup</router-link>
 		<router-link v-if=this.$root.token to=/activity>New Activity</router-link>

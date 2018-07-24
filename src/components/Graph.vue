@@ -91,7 +91,7 @@ export default {
     graph({ nodes, links }) {
       var elem = document.querySelector("#graph");
       var width = elem.clientWidth,
-          height = elem.clientHeight;
+        height = elem.clientHeight;
 
       var svg = d3
         .select("#graph")
@@ -325,7 +325,7 @@ export default {
           ? "#1D3557"
           : "black";
       }
-      
+
       //neighbours
       function getNeighbors(node) {
         return links.reduce(
@@ -437,7 +437,7 @@ aside {
   left: 0;
   width: 80vw;
   max-width: 400px;
-  z-index: 1;
+  z-index: 100;
   padding: 10em 0 0 0;
   background: rgba(255, 255, 255, 0.9);
   overflow: scroll;
@@ -463,5 +463,4 @@ aside nav {
   overflow: hidden;
   padding: 0;
 }
-
 </style>

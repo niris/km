@@ -97,7 +97,10 @@
     <button v-if="update&&edit" v-on:click.prevent="editmode=avatar=false" title="Cancel">✕</button>
     <button v-if="update&&edit" title="Update">✓</button>
   </div>
-	<Graph v-if="!edit&&!summary" :id=this.id ></Graph>
+  <template v-if="!edit&&!summary">
+     <h1>User's Egocentric Graph</h1>
+	<Graph :id=this.id ></Graph>
+	</template>
 </form>
 </template>
 
