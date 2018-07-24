@@ -24,9 +24,7 @@ export default {
     this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
       .then(r => r.json())
       .then(users =>
-        this.graph(
-          this.id ? this.transform(users, true) : this.transform(users, false)
-        )
+        this.graph(this.transform(users, !!this.id))
       );
   },
 
@@ -89,31 +87,22 @@ export default {
     },
 
     graph({ nodes, links }) {
-      var elem = document.querySelector("#graph");
-      var width = elem.clientWidth,
-        height = elem.clientHeight;
+      var width = window.innerWidth,
+        height = window.innerHeight*1.5,
+        circleWidth = 10;
+
+      //window.addEventListener("resize", resize);
 
       var svg = d3
         .select("#graph")
         .attr("width", width)
         .attr("height", height)
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .call(
-          d3.zoom().on("zoom", function() {
+        .attr("viewBox", 0 + " " + 0 + " " + width + " " + height )
+        .call(d3.zoom().on("zoom", function() {
             svg.attr("transform", d3.event.transform);
           })
         )
         .append("g");
-
-      window.addEventListener("resize", function() {
-        var elem = document.querySelector("#graph");
-        (width = elem.clientWidth), (height = elem.clientHeight);
-        svg = d3
-          .select("#graph")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("viewBox", `0 0 ${width} ${height}`);
-      });
 
       var color = d3.scaleOrdinal([
         "#2B2D42",
@@ -178,29 +167,30 @@ export default {
         .attr("class", "node")
         .call(dragDrop);
 
-      var defs = svg
-        .append("defs")
+      var defs = svg.append("defs");
+
+      defs
         .selectAll(".node-pattern")
         .data(nodes)
         .enter()
         .append("pattern")
-        .attr("id", d => d.id.toLowerCase().replace(/ /g, "-"))
+        .attr("id", d => {
+          return d.id.toLowerCase().replace(/ /g, "-");
+        })
         .attr("height", "100%")
         .attr("width", "100%")
         .attr("patternContentUnits", "objectBoundingBox")
         .append("image")
         .attr("height", 1)
         .attr("width", 1)
-        .attr(
-          "xlink:href",
-          d =>
-            [
-              d.avatar ||
-                "https://image.flaticon.com/icons/png/512/149/149071.png",
-              "",
-              ""
-            ][d.level - 1]
-        );
+        .attr("xlink:href", function(d) {
+          return [
+            d.avatar ||
+              "https://image.flaticon.com/icons/png/512/149/149071.png",
+            "",
+            ""
+          ][d.level - 1];
+        });
 
       nodeElements
         .append("circle")
@@ -209,6 +199,7 @@ export default {
           "fill",
           d => "url(#" + d.id.toLowerCase().replace(/ /g, "-") + ")"
         )
+
         .on("mouseover", mouseOver)
         .on("mouseout", mouseOut)
         .on("click", this.showpopup);
@@ -236,10 +227,10 @@ export default {
           if (d.level == 1) return height * 0.045;
         })
         .attr("dx", d => {
-          if (d.level == 1) return width * -0.025;
+          if (d.level == 1) return height*0.075;
         })
         .attr("fill", function(node) {
-          return color(node.level);
+           return color(node.level);
         })
         .call(dragDrop)
         .on("click", this.showpopup);
@@ -265,9 +256,9 @@ export default {
           return getLinkWidth(n, link);
         });
 
-        // textElements.attr("fill", function(node) {
-        //   return getTextColor(node, neighbors);
-        // });
+       // textElements.attr("fill", function(node) {
+       //   return getTextColor(node, neighbors);
+       // });
 
         textElements.attr("font-size", function(d) {
           return n.id == d.id ? "1.5em" : font_size[d.level - 1];
@@ -378,7 +369,8 @@ export default {
             d.target.y
           );
         });
-        /* .attr("x1", function(link) {
+        linkElements
+          .attr("x1", function(link) {
             return link.source.x;
           })
           .attr("y1", function(link) {
@@ -389,7 +381,7 @@ export default {
           })
           .attr("y2", function(link) {
             return link.target.y;
-          })*/
+          })
         //nodeElements.attr("cx", node => node.x).attr("cy", node => node.y)
 
         nodeElements
@@ -397,7 +389,10 @@ export default {
             return (d.x = Math.max(radius, Math.min(width - radius, d.x)));
           })
           .attr("cy", function(d) {
-            return (d.y = Math.max(radius, Math.min(height - radius, d.y)));
+            return (d.y = Math.max(
+              radius,
+              Math.min(height - radius, d.y)
+            ));
           });
 
         nodeElements.attr("transform", function(d) {
@@ -449,6 +444,15 @@ aside nav {
   right: 1em;
 }
 
+@media screen and (min-width: 700px) {
+  dl {
+    font-size: 1em;
+  }
+
+  .router a{
+	font-size: 1em;
+	}
+}
 @media screen and (max-width: 960px) {
   .fab {
     right: 0.5em;
@@ -458,9 +462,10 @@ aside nav {
 #graph {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   vertical-align: center;
-  overflow: hidden;
-  padding: 0;
+  overflow: inherit;
+  padding: 2em 1em 1em 1em;
 }
+
 </style>
