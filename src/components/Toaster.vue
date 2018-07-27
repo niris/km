@@ -18,12 +18,13 @@ export default {
 #toaster {
 	position: fixed;
 	left: 1em;
-	bottom: 1em;
+	top:1em;
 	background: #333;
 	border: 1px solid black;
 	color: white;
 	border-radius: .2em;
 	padding: 1em;
 	box-shadow: .15em .15em .2em black;
+	z-index: 999;
 }
 </style>

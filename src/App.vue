@@ -91,6 +91,12 @@ button {
   margin-right: .5em;
   box-shadow: 0.05em 0.05em 0.1em;
 }
+
+.tags li.tag2{
+  /*background: #F8F8F8;*/
+  font-size:small;
+}
+
 .tags input{
 	background:none!important;
 	border:none!important;

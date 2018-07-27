@@ -1,10 +1,15 @@
 var express = require('express'), db
 	, bodyParser = require('body-parser')
-	, mongodb = require('mongodb');
+	, mongodb = require('mongodb')
+	, path = require('path');
+
 hash = (pwd) => require('crypto').createHash('sha1').update('your_salt').update(pwd).digest('hex');
 fromToken = (usr, h) => hash(usr) == h ? usr : null;
 toToken = (id) => [id, hash(id)].join(' ');
 noPass = (obj) => { delete obj.password; return obj }
+
+
+
 var api = express.Router();
 api.use(bodyParser.urlencoded({ extended: true }));
 api.use(bodyParser.json());
@@ -12,6 +17,8 @@ api.use(require('cors')({ allowedHeaders: "authorization", exposedHeaders: "auth
 api.use(require('multer')().fields([]));
 api.use((req, res, next) => { if (req.body.password) req.body.password = hash(req.body.password); next() });
 api.use((req, res, next) => { if (req.headers.authorization) req.user = fromToken(...req.headers.authorization.split(" ")); next() });
+
+
 
 api.post('/token', (req, res) => db.collection('users')
 	.findOne({ _id: req.body._id, password: req.body.password })

@@ -2,8 +2,6 @@
 	<div>
     <div class="head">
     <h1>RERU Experts lookup</h1>
-
-
   <div class="search-desc">
   <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px"
 	 height="24px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
@@ -23,25 +21,24 @@
 		<fieldset>
 		<input type=search name=keyword placeholder="Enter your keywords ...">
 		<ul class=flex-space-between>
-			<li><label><input type=radio name=type value=user> User</label></li>
-			<li><label><input type=radio name=type value=activity> Activity</label></li>
-			<li><label><input type=radio name=type checked> Any</label></li>
+			<li><label><input type=radio name=type value=user> ผู้เชี่ยวชาญ</label></li>
+			<li><label><input type=radio name=type value=activity> กิจกรรม</label></li>
+			<li><label><input type=radio name=type value=any checked> ทั้งหมด</label></li>
 			<button>Search</button>
 		</ul>
 		</fieldset>
-		<h1 v-if="users && users.length">Users</h1>
-		<h4 v-if="users && !users.length">No users found</h4>
+		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> ผู้เชี่ยวชาญ </h2>
 		<ul v-if=users>
 			<li v-for="u in users">
 				<router-link :to="{name:'User', params:{id:u._id}}">{{ u.firstName }} {{ u.lastName }} - {{u.function}} {{u.department}}</router-link>
 				{{user}}
 			</li>
 		</ul>
-		<h1 v-if="activities && activities.length">Activities</h1>
-		<h4 v-if="activities && !activities.length">No activities found</h4>
+		<h2 v-if="activities && activities.length"><img src="/public/img/calendar-60.svg"> กิจกรรม </h2>
 		<ul v-if=activities>
 			<li v-for="a in activities"><router-link :to="{name:'Activity', params:{id:a._id}}">{{ a.type }} - {{ a.name }}</router-link> by <router-link :to="{name:'User', params:{id:a.u_id}}">{{ a.u_id }}</router-link></li>
 		</ul>
+		<h4 v-if="activities && users && !users.length && !activities.length">   ไม่พบข้อมูลสำหรับการค้นหา &#9785; </h4>
 	</form>
 </div>
 
@@ -70,8 +67,6 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
 h1 {
   font-size: 200%;
@@ -81,7 +76,15 @@ h1 {
 
 h2 {
   font-size: 150%;
-  text-align: center;
+  text-align: left;
+}
+
+h4 {
+
+	margin-top : 5%;
+	font-size: 125%;
+	text-align:center;
+  color: #A9A9A9;
 }
 
 .head {

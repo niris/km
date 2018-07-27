@@ -3,6 +3,8 @@ const express = require('express');
 const app = express(), port=3200;
 
 app.use('/api', require('./api'));
+var htmlPath = path.join(__dirname, '/public');
+app.use('/public',express.static(htmlPath));
 
 const dist = express.static(path.join(__dirname,'../dist'));
 app.use(dist, require('connect-history-api-fallback')(), dist);

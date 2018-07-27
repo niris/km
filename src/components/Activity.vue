@@ -1,6 +1,6 @@
 <template>
 <form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/activity>
-  <h1 v-if=create>Create a new Activity</h1>
+  <h1 v-if=create>&#8853; เพิ่มกิจกรรมใหม่</h1>
   <h1 v-if=update>My Activity</h1>
   <h1 v-if=search>Activity detail</h1>
 
@@ -10,24 +10,39 @@
     <label v-if=!create>Owner</label>
     <p v-if=!create><router-link :to="{name:'User', params:{id:activity.u_id}}">{{activity.u_id}}</router-link></p>
     
-    <label>Type</label>
+    <label>ประเภทกิจกรรม</label>
     <select v-if=edit name=type :value=activity.type required>
-      <option>Conference/Workshop/Seminar</option>
-      <option>Visit</option>
-      <option>Research</option>
-      <option>Contest</option>
+      <option>งานประชุมวิชาการ</option>
+      <option>ศึกษาดูงาน</option>
+      <option>ฝึกอบรม</option>
+      <option>วิจัย</option>
+      <option>บริการวิชาการ</option>
+      <option>ประกวด/แข่งขัน</option>
     </select>
     <p v-else>{{activity.type}}</p>
 
-    <label>Name</label>
+    <label>ชื่อกิจกรรม</label>
     <input v-if=edit name=name :value=activity.name required>
     <p v-else>{{activity.name}}</p>
+    <label>สถานที่</label>
+    <input v-if=edit name=place :value=activity.place required>
+    <p v-else>{{activity.place}}</p>
 
-    <label>Description</label>
+
+    <label>วันที่เริ่ม</label>
+    <input v-if=edit type=date name=from ref=start :value=activity.from required>
+    <p v-else>{{activity.from}}</p>
+
+    <label>วันที่สิ้นสุด</label>
+    <input v-if=edit type=date name=to :value=activity.to required>
+    <p v-else>{{activity.to}}</p>
+
+
+    <label>คำอธิบาย</label>
     <textarea v-if=edit name=description :value=activity.description rows=15 />
     <div v-else v-html="md(activity.description||'')"/>
 
-    <label>Conclusion</label>
+    <label>สรุปผลการทำกิจกรรม</label>
     <textarea v-if=edit name=conclusion :value=activity.conclusion rows=15 />
     <div v-else v-html="md(activity.conclusion||'')"/>
 
@@ -36,14 +51,6 @@
     <ul v-else class=tags>
       <li v-for="t in activity.tags" :key=t>{{t}} </li>
     </ul>
-
-    <label>Started</label>
-    <input v-if=edit type=date name=from ref=start :value=activity.from required>
-    <p v-else>{{activity.from}}</p>
-
-    <label>Ended</label>
-    <input v-if=edit type=date name=to :value=activity.to required>
-    <p v-else>{{activity.to}}</p>
   </div>
   <datalist id=suggests></datalist>
   <div class=fab>

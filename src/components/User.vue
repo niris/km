@@ -1,9 +1,9 @@
 <template>
 <form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/users>
   <template v-if=!summary>
-    <h1 v-if=create>Create a new account</h1>
-    <h1 v-if=update>My Account</h1>
-    <h1 v-if=search>Account detail</h1>
+    <h1 v-if=create>&#8853; สมัครสมาชิก</h1>
+    <h1 v-if=update><img src="/public/img/badge-13.svg"> My Account</h1>
+    <h1 v-if=search><img src="/public/img/badge-13.svg"> Account detail</h1>
   </template>
 
   <div class=avatar v-if=user>
@@ -22,56 +22,56 @@
   </div>
 
   <div class="grid-m-a" v-if=user>
-    <label>First Name</label>
+    <label>ชื่อ</label>
     <input v-if=edit name=firstName autocomplete=given-name :value=user.firstName>
     <p v-else>{{user.firstName}}</p>
     
-    <label>Last Name</label>
+    <label>นามสกุล</label>
     <input v-if=edit name=lastName autocomplete=family-name :value=user.lastName>
     <p v-else>{{user.lastName}}</p>
+    
+    <label>หน่วยงาน</label>
+    <input v-if=edit name=department autocomplete=organization :value=user.department>
+    <p v-else>{{user.department}}</p>
+    
+    <label>ตำแหน่ง</label>
+    <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title :value=user.function list=suggests />
+    <p v-else>{{user.function}}</p>
+    
+    <template v-if="!summary">
+    <label>วันที่เริ่มทำงาน</label>
+    <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" :value=user.startwork>
+    <p v-else>{{user.startwork}}</p>
     
     <label>Email</label>
     <input v-if=edit name=email autocomplete=email :value=user.email>
     <p v-else><a :href="'mailto:'+user.email">{{user.email}}</a></p>
     
-    <label>Department</label>
-    <input v-if=edit name=department autocomplete=organization :value=user.department>
-    <p v-else>{{user.department}}</p>
-    
-    <label>Function</label>
-    <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title :value=user.function list=suggests />
-    <p v-else>{{user.function}}</p>
-    
-    <template v-if="!summary">
-    <label>Working Since</label>
-    <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" :value=user.startwork>
-    <p v-else>{{user.startwork}}</p>
-    
-    <label>Telephone</label>
+    <label>เบอร์โทรศัพท์</label>
     <input v-if=edit name=phone type=tel autocomplete="tel-national" :value=user.phone>
     <p v-else>{{user.phone}}</p>
     
-    <label>Address</label>
+    <label>ที่อยู่</label>
     <input v-if=edit name=address autocomplete=street-address :value=user.address>
     <p v-else>{{user.address}}</p>
     
-    <label>Description</label>
-    <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" :value=user.description rows=15 />
-    <p v-else v-html="md(user.description)"/>
-    
-    <label>Publications</label>
+    <label>ผลงานวิชาการ</label>
     <TagList v-if=edit :list=user.publications placeholder="New Publication..." from="/api/user" name="publications[]"></TagList>
     <ul v-else><li v-for="u in user.publications" :key=u>{{u}}</li></ul>
     </template>
     
-    <label>Major Expertises</label>
+    <label>ความชำนาญหลัก</label>
     <TagList v-if=edit :list=user.domain class=tags placeholder="New Domain..." from="/api/user" name="domain[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul>
     
-    <label>Other Knowledge</label>
+    <label>ความชำนาญรอง</label>
     <TagList v-if=edit :list=user.knowledge class=tags placeholder="New knowledge..." from="/api/user" name="knowledge[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.knowledge" :key=u>{{u}}</li></ul>
 
+    <label>คำอธิบายเพิ่มเติม</label>
+    <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" :value=user.description rows=15 />
+    <p v-else v-html="md(user.description)"/>
+  
     <label v-if=create>Login</label>
     <input name=_id autocomplete=username required :value=user._id :type="create?'text':'hidden'">
     
@@ -80,7 +80,7 @@
   </div>
 	<datalist id=suggests></datalist>
   <template v-if="!create && !summary">
-    <h1>User's Activities</h1>
+    <h2><img src="/public/img/calendar-60.svg"> รายการกิจกรรม</h2>
     <ul v-if="user.activities && user.activities.length">
       <li v-for="a in user.activities" :key=a._id>
         <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
@@ -89,7 +89,7 @@
         </form>
       </li>
     </ul>
-    <p v-else>This user does not have any activities</p>
+    <p v-else>ไม่พบกิจกรรม</p>
   </template>
   <div class=fab v-if="!summary">
     <button v-if="create" title="Create">✓</button>
@@ -98,7 +98,6 @@
     <button v-if="update&&edit" title="Update">✓</button>
   </div>
   <template v-if="!edit&&!summary">
-  <h1>User's Egocentric Graph</h1>
 	<Graph :id=this.id></Graph>
 	</template>
 </form>
@@ -248,7 +247,12 @@ export default {
 </script>
 <style scoped>
 h1 {
-  text-align: center;
+  text-align: left;
+}
+
+h2{
+  margin-top: 10%;
+  text-align: left;
 }
 .avatar {
   text-align: center;

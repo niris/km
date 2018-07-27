@@ -1,27 +1,22 @@
 <template>
   <div>
-    <aside class="sidebar" id=userDialog hidden>
-      <button id="button-close" v-on:click=closeUserDialog>x</button><br>
+    <div v-if="seen" class= close-area id=close v-on:click=closeUserDialog></div>
+    <aside class=sidebar id=userDialog hidden>  
       <div class="img-container">
-     <img :src="avatar||userinfo.avatar||'https://image.flaticon.com/icons/png/512/149/149071.png'">
-      <div class="name">{{userinfo.firstName}} {{userinfo.lastName}}</div>
+     <img class=avatar :src="avatar||userinfo.avatar||'https://image.flaticon.com/icons/png/512/149/149071.png'">
+      <div class="name"><router-link :to="'/user/'+ userinfo._id"> {{userinfo.firstName}} {{userinfo.lastName}}</router-link></div>
       </div>
       <dl>
-				<dt>หน่วยงาน</dt>
+				<dt><img src="/public/img/home-52.svg"></dt>
   				<dd>{{userinfo.department}}</dd>
-        <dt>ตำแหน่ง </dt>
-  				<dd>{{userinfo.fonction}}</dd>
-				<dt>ความชำนาญหลัก</dt>
-          <dd><ul class=tags><li v-for="u in userinfo.domain" :key=u>{{u}}</li></ul></dd>
-           <!--!<dd>{{user.domain}}</dd> -->
-				<dt>ความชำนาญรอง</dt>
-          <dd><ul class=tags><li v-for="u in userinfo.Knowledge" :key=u>{{u}}</li></ul></dd>
-				 <dt>ติดต่อ</dt>
+        <dt><img src="/public/img/briefcase-24.svg"></dt>
+  				<dd>{{userinfo.function}}</dd>
+				<dt><img src="/public/img/layers-3.svg"></dt>
+          <dd><ul class=tags><li v-for="u in userinfo.domain" :key=u>{{u}}</li><li class="tag2" v-for="u in userinfo.knowledge" :key=u>{{u}}</li></ul></dd>
+				 <dt><img src="/public/img/email-84.svg"></dt>
   				<dd><a :href="'mailto:'+userinfo.email">{{userinfo.email}}</a></dd>
-			</dl>
-      <div class="router">
-      <router-link :to="'/user/'+ userinfo._id"> ข้อมูลเพิ่มเติม</router-link>
-      </div>
+        </dl>
+
     </aside>
     <svg id=graph></svg>
 	</div>
@@ -31,7 +26,8 @@
 export default {
   props: ["id"],
   data: () => ({
-    userinfo: {}
+    userinfo: {},
+     seen: false
   }),
   mounted() {
     this.load();
@@ -47,7 +43,6 @@ export default {
           )
         );
       this.closeUserDialog();
-
     },
 
     transform(users, ego) {
@@ -103,7 +98,7 @@ export default {
           nodes.push({ id: d, label: d, group: 2, level: 2 })
         );
       }
-
+      console.log(nodes, links);
       return { nodes, links };
     },
 
@@ -112,7 +107,10 @@ export default {
       var width = 720,
         height = 720;
 
-      d3.select("g").remove();
+      d3
+        .select("#graph")
+        .selectAll("g")
+        .remove();
 
       var svg = d3
         .select("#graph")
@@ -121,10 +119,10 @@ export default {
         .attr("viewBox", `0 0 ${width} ${height}`)
         .call(
           d3.zoom().on("zoom", function() {
-          svg.attr("transform", d3.event.transform);
-        })
-      )
-      .append("g");
+            svg.attr("transform", d3.event.transform);
+          })
+        )
+        .append("g");
 
       /* window.addEventListener("resize", function() {
         var elem = document.querySelector("#graph");
@@ -432,23 +430,24 @@ export default {
         nodes[0].x = width / 2;
         nodes[0].y = height / 2;
       });
-
       simulation.force("link").links(links);
     },
 
     showpopup(node) {
       if (node.level == 1) {
-        console.log(node.id)
+        console.log(node.id);
         this.sfetch("/api/user/" + node.id)
           .then(r => r.json())
           .then(json => {
             this.userinfo = json;
             userDialog.hidden = false;
+            this.seen = true;
           });
       }
     },
     closeUserDialog() {
       userDialog.hidden = true;
+      this.seen = false;
     }
   },
   watch: {
@@ -467,10 +466,10 @@ aside {
   left: 0;
   width: 80vw;
   max-width: 400px;
-  z-index: 100;
+  z-index: 150;
   padding: 5em 0 0 0;
   background: rgba(255, 255, 255, 0.9);
-  overflow: scroll;
+  overflow: auto;
   box-shadow: black 0 0 1em;
 }
 aside nav {
@@ -494,7 +493,7 @@ aside nav {
   padding: 0;
 }
 
-img {
+img.avatar {
   border-radius: 100%;
   box-shadow: 0 0 0.2em 0px;
   width: 50%;
@@ -507,12 +506,6 @@ img {
   top: 5px;
   right: 0px;
   /*background-color: #1d3557;*/
-}
-
-.router a {
-  position: absolute;
-  bottom: 2%;
-  right: 25px;
 }
 
 .img-container {
@@ -529,8 +522,9 @@ img {
 }
 
 .img-container .name {
-  margin: auto;
-  text-align: center;
+    margin-top: 5%;
+    text-align: center;
+    font-size: large;
 }
 
 dl {
@@ -539,24 +533,39 @@ dl {
   overflow: hidden;
   padding: 0;
   margin: 0;
-  line-height: 2.5;
+  line-height: 3;
 }
 dt {
   position: relative;
   float: left;
   clear: left;
-  width: 35%;
-  text-indent: 5px;
+  width: 10%;
+  margin-left: 5%;
   font-weight: 550;
 }
 dd {
-  width: 65%;
-  margin-left: 35%;
+  width: 80%;
+  margin-left: 20%;
   font-weight: lighter;
+}
+
+dd.router{
+  position: relative;
+  float:right;
 }
 
 dd:after {
   content: "\a";
   white-space: pre;
+}
+
+.close-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 100;
 }
 </style>

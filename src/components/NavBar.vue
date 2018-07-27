@@ -1,7 +1,7 @@
 <template>
 	<nav>
 		<a href=//km.reru.ac.th class=logo>
-		<svg width="32px" height="32px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+		<svg width="48px" height="48px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
 			<defs><radialGradient id="svg_4" spreadMethod="pad"><stop stop-color="#ffff80" offset="0"/><stop stop-color="#00007f" offset="1"/></radialGradient></defs>
 			<g>
 			<ellipse fill="#007f3f" stroke-width="5" cx="128" cy="128.000001" id="svg_1" rx="96" ry="120" stroke="#bfbf00"/>
@@ -10,13 +10,13 @@
 			<path fill="#ffffff" stroke-width="0" stroke-opacity="null" fill-opacity="null" d="m90.000002,191.863804l37.999954,-17.188427l38.000044,17.188427l-14.514659,27.811576l-46.970636,0l-14.514703,-27.811576z" id="svg_8" stroke="#bfbf00"/>
 			<path fill="#ffffff" stroke-width="0" stroke-opacity="null" fill-opacity="null" d="m97,88.520624l31.000001,-55l31.000001,55l-62.000002,0z" id="svg_9" stroke="#bfbf00"/>
 			</g>
-			</svg>KM
+			</svg> <span class="km">KM</span>
 		</a>
-		<router-link to=/>Experts lookup</router-link>
-		<router-link v-if=this.$root.token to=/activity>New Activity</router-link>
+		<router-link to=/>&#128269; Experts lookup</router-link>
+		<router-link title="เพิ่มกิจกรรมใหม่" v-if=this.$root.token to=/activity>&#8853; Activity</router-link>
 		<router-link v-if=!this.$root.token to=/user>Sign Up</router-link>
 		<template v-if=this.$root.token>
-			<router-link :to="{name:'User', params:{id:this.$root.me}}">{{this.$root.me}}</router-link>
+			<router-link :to="{name:'User', params:{id:this.$root.me}}">My profile</router-link>
 			<button v-on:click=logout title="Sign Out"><svg xmlns="http://www.w3.org/2000/svg" width="22px" height="16px" viewBox="-4 0 32 32"><path d="m 18,24 0,4 -14,0 0,-24 14,0 0,4 4,0 0,-8 -22,0 0,32 22,0 0,-8 z m -6,-4.003 0,-8 12,0 0,-4 8,8 -8,8 0,-4 z" /></svg></button>
 		</template>
 		<form v-else v-on:submit.prevent="login($event.target)" method=POST action=/api/token>
@@ -66,7 +66,7 @@ nav {
   font-size: 0;
 }
 .logo svg {
-  vertical-align: text-top;
+  vertical-align: center;
 }
 @media only screen and (min-width: 760px) {
   .logo {
