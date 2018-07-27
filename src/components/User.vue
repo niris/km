@@ -98,8 +98,8 @@
     <button v-if="update&&edit" title="Update">✓</button>
   </div>
   <template v-if="!edit&&!summary">
-     <h1>User's Egocentric Graph</h1>
-	<Graph :id=this.id ></Graph>
+  <h1>User's Egocentric Graph</h1>
+	<Graph :id=this.id></Graph>
 	</template>
 </form>
 </template>
@@ -191,6 +191,7 @@ export default {
         .then(res => res.json())
         .then(json => (this.user = json))
         .catch(err => this.$root.$refs.toast);
+      scrollTo(0,0);
     },
     post($event) {
       if (document.activeElement instanceof HTMLInputElement) {

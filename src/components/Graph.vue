@@ -3,31 +3,24 @@
     <aside class="sidebar" id=userDialog hidden>
       <button id="button-close" v-on:click=closeUserDialog>x</button><br>
       <div class="img-container">
-			<img src="https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png">
+     <img :src="avatar||userinfo.avatar||'https://image.flaticon.com/icons/png/512/149/149071.png'">
+      <div class="name">{{userinfo.firstName}} {{userinfo.lastName}}</div>
       </div>
       <dl>
-  			<dt>First name : </dt>
-  				<dd>{{user.firstName}}</dd>
-  			<dt>Last name : </dt>
-  				<dd>{{user.lastName}}</dd>
-				<dt>Function : </dt>
-  				<dd>{{user.fonction}}</dd>
-				<dt>Department : </dt>
-  				<dd>{{user.department}}</dd>
-				<dt>Expert domain : </dt>
-          <dd><ul class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul></dd>
+				<dt>หน่วยงาน</dt>
+  				<dd>{{userinfo.department}}</dd>
+        <dt>ตำแหน่ง </dt>
+  				<dd>{{userinfo.fonction}}</dd>
+				<dt>ความชำนาญหลัก</dt>
+          <dd><ul class=tags><li v-for="u in userinfo.domain" :key=u>{{u}}</li></ul></dd>
            <!--!<dd>{{user.domain}}</dd> -->
-				<dt>Knowledge : </dt>
-          <dd><ul class=tags><li v-for="u in user.Knowledge" :key=u>{{u}}</li></ul></dd>
-       <!-- <dt>Publications : </dt>
-         <dd v-for="u in user.publications" :key=u>{{u}}</dd>
-          <dd><ul><li v-for="u in user.publications" :key=u>{{u}}</li></ul></dd>
-        -->
-				 <dt>Contact : </dt>
-  				<dd>{{user.email}}</dd>
+				<dt>ความชำนาญรอง</dt>
+          <dd><ul class=tags><li v-for="u in userinfo.Knowledge" :key=u>{{u}}</li></ul></dd>
+				 <dt>ติดต่อ</dt>
+  				<dd><a :href="'mailto:'+userinfo.email">{{userinfo.email}}</a></dd>
 			</dl>
       <div class="router">
-      <router-link :to="'/user/'+ user._id"> More information</router-link>
+      <router-link :to="'/user/'+ userinfo._id"> ข้อมูลเพิ่มเติม</router-link>
       </div>
     </aside>
     <svg id=graph></svg>
@@ -38,19 +31,25 @@
 export default {
   props: ["id"],
   data: () => ({
-    user: {}
+    userinfo: {}
   }),
   mounted() {
-    this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
-      .then(r => r.json())
-      .then(users =>
-        this.graph(
-          this.id ? this.transform(users, true) : this.transform(users, false)
-        )
-      );
+    this.load();
   },
 
   methods: {
+    load() {
+      this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
+        .then(r => r.json())
+        .then(users =>
+          this.graph(
+            this.id ? this.transform(users, true) : this.transform(users, false)
+          )
+        );
+      this.closeUserDialog();
+
+    },
+
     transform(users, ego) {
       var nodes = [],
         links = [],
@@ -109,9 +108,11 @@ export default {
     },
 
     graph({ nodes, links }) {
-     // var elem = document.querySelector("#graph");
+      // var elem = document.querySelector("#graph");
       var width = 720,
         height = 720;
+
+      d3.select("g").remove();
 
       var svg = d3
         .select("#graph")
@@ -120,10 +121,10 @@ export default {
         .attr("viewBox", `0 0 ${width} ${height}`)
         .call(
           d3.zoom().on("zoom", function() {
-            svg.attr("transform", d3.event.transform);
-          })
-        )
-        .append("g");
+          svg.attr("transform", d3.event.transform);
+        })
+      )
+      .append("g");
 
       /* window.addEventListener("resize", function() {
         var elem = document.querySelector("#graph");
@@ -265,7 +266,6 @@ export default {
         .on("click", this.showpopup);
 
       textElements.exit().remove();
-
       function mouseOver(n, i) {
         if (n.level != 2) {
           d3
@@ -285,13 +285,17 @@ export default {
           return getLinkWidth(n, link);
         });
 
+        textElements.attr("font-weight", function(node) {
+          return n.id == node.id ? 700 : ["lighter", 700, 350][node.level - 1];
+        });
+
         // textElements.attr("fill", function(node) {
         //   return getTextColor(node, neighbors);
         // });
 
-        textElements.attr("font-size", function(d) {
-          return n.id == d.id ? "1.5em" : font_size[d.level - 1];
-        });
+        // textElements.attr("font-size", function(d) {
+        //   return n.id == d.id ? "1.5em" : font_size[d.level - 1];
+        // });
 
         //CIRCLE
         //this.setAttribute("r", circleWidth+5)
@@ -316,8 +320,8 @@ export default {
           .attr("stroke-width", 1)
           .attr("stroke", "rgba(50, 50, 50, 0.2)");
 
-        textElements.attr("font-size", function(d) {
-          return font_size[d.level - 1];
+        textElements.attr("font-weight", function(node) {
+          return ["lighter", 700, 350][node.level - 1];
         });
       }
 
@@ -434,16 +438,22 @@ export default {
 
     showpopup(node) {
       if (node.level == 1) {
+        console.log(node.id)
         this.sfetch("/api/user/" + node.id)
           .then(r => r.json())
           .then(json => {
-            this.user = json;
+            this.userinfo = json;
             userDialog.hidden = false;
           });
       }
     },
     closeUserDialog() {
       userDialog.hidden = true;
+    }
+  },
+  watch: {
+    id: function(id) {
+      this.load();
     }
   }
 };
@@ -458,7 +468,7 @@ aside {
   width: 80vw;
   max-width: 400px;
   z-index: 100;
-  padding: 10em 0 0 0;
+  padding: 5em 0 0 0;
   background: rgba(255, 255, 255, 0.9);
   overflow: scroll;
   box-shadow: black 0 0 1em;
@@ -482,5 +492,71 @@ aside nav {
   vertical-align: center;
   overflow: hidden;
   padding: 0;
+}
+
+img {
+  border-radius: 100%;
+  box-shadow: 0 0 0.2em 0px;
+  width: 50%;
+  height: 50%;
+  background-size: contain;
+}
+
+#button-close {
+  position: absolute;
+  top: 5px;
+  right: 0px;
+  /*background-color: #1d3557;*/
+}
+
+.router a {
+  position: absolute;
+  bottom: 2%;
+  right: 25px;
+}
+
+.img-container {
+  position: relative;
+  margin: auto;
+  width: 200px;
+  height: 120px;
+  margin-bottom: 150px;
+}
+
+.img-container img {
+  width: 100%;
+  height: auto;
+}
+
+.img-container .name {
+  margin: auto;
+  text-align: center;
+}
+
+dl {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  line-height: 2.5;
+}
+dt {
+  position: relative;
+  float: left;
+  clear: left;
+  width: 35%;
+  text-indent: 5px;
+  font-weight: 550;
+}
+dd {
+  width: 65%;
+  margin-left: 35%;
+  font-weight: lighter;
+}
+
+dd:after {
+  content: "\a";
+  white-space: pre;
 }
 </style>
