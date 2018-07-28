@@ -12,8 +12,8 @@
 			</g>
 			</svg> <span class="km">KM</span>
 		</a>
-		<router-link to=/>&#128269; Experts lookup</router-link>
-		<router-link title="เพิ่มกิจกรรมใหม่" v-if=this.$root.token to=/activity>&#8853; Activity</router-link>
+		<router-link to=/> Experts lookup</router-link>
+		<router-link title="เพิ่มกิจกรรมใหม่" v-if=this.$root.token to=/activity> Activity</router-link>
 		<router-link v-if=!this.$root.token to=/user>Sign Up</router-link>
 		<template v-if=this.$root.token>
 			<router-link :to="{name:'User', params:{id:this.$root.me}}">My profile</router-link>

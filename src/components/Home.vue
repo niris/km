@@ -5,14 +5,16 @@
 
 <form method=GET action=/api/search v-on:submit.prevent=search>
 		<fieldset>
-		<input class=placeholder type=search name=keyword placeholder="ใส่ keyword สำหรับค้นหา และกด Enter ...">
+		<input class=placeholder type=search name=keyword v-model="searchtext" placeholder="ใส่ keyword สำหรับค้นหา และกด Enter ...">
+		<a v-if="searchtext" @click=flush()>&times;</a>
 		<select class=selection v-model="selected" name=type>
   		<option v-for="option in options" v-bind:value="option.value">
    		 {{ option.text }}
   	</option>
 </select>
-		<button class="search-button"><img src="/public/img/zoom-2.svg"></button>
+		<button class="search-button">&#128269;</button>
 		</fieldset>
+		<div v-if=searchtext>
 		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> ผู้เชี่ยวชาญ </h2>
 		<ul v-if=users>
 			<li v-for="u in users">
@@ -24,12 +26,13 @@
 		<ul v-if=activities>
 			<li v-for="a in activities"><router-link :to="{name:'Activity', params:{id:a._id}}">{{ a.type }} - {{ a.name }}</router-link> by <router-link :to="{name:'User', params:{id:a.u_id}}">{{ a.u_id }}</router-link></li>
 		</ul>
-		<h4 v-if="activities && users && !users.length && !activities.length">   ไม่พบข้อมูลสำหรับการค้นหา &#9785; </h4>
+</div>
+		<h4 v-if="activities && users && !users.length && !activities.length && !seen">  ไม่พบข้อมูลสำหรับการค้นหา &#9785; </h4>
+
 	</form>
 </div>
-
 <div class="grp">  
-    <Graph v-if= "!users && !activities" id=""></Graph>
+    <Graph v-if="seen" id=""></Graph>
 	</div>
   	</div>
 </template>
@@ -41,7 +44,9 @@ export default {
   data: () => ({
     users: null,
     activities: null,
-    selected: "any",
+		selected: "any",
+		seen: true,
+		searchtext: "",
     options: [
       { text: "ทั้งหมด", value: "any" },
 
@@ -55,8 +60,13 @@ export default {
       this.sfetch($event.target)
         .then(req => req.json())
         .then(([u, a]) => ([this.users, this.activities] = [u, a]))
-        .catch(this.$root.$refs.toast);
-    }
+				.catch(this.$root.$refs.toast);
+			this.seen=false;
+		},
+		flush(){
+			this.searchtext ="";	
+			this.seen=true;		
+		},
   }
 };
 </script>
@@ -100,37 +110,33 @@ h4 {
   justify-content: space-between;
 }
 
-
 .placeholder{
 	width:70%;
 	display:inline-block;
 }
 
-.selection {
-	
+.selection {	
 	position:relative;
 	width:17%;
 	display:inline-block;
 	margin-left :1%;
 }
 
+input.back-button{
+	background-color: rgba(255, 255, 255, 0.85);
+	width : 5%;
+	float : right;
+}
+
 button.search-button{
-
-background-color: rgba(255, 255, 255, 0.85);
-	display:inline-block;
-	padding: 0;
-	margin-left : 1%
+	display: inline-block;
+	padding:0 0.1;
 }
 
-
-button.search-button img{
-	height:75%;
-	width:auto;
-}	
-
-button.search-button:hover{
-border-color:  rgba(255, 255, 255, 0.85);
+fieldset a{
+	position:relative;
+	right:2em;
+	top:0;
 }
-
 
 </style>

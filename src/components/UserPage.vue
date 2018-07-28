@@ -1,14 +1,11 @@
 <template>
-
 <div>
-	<User></User>
 	<Graph></Graph>
 <div>
 </template>
 
 <script>
 
-import User from "@/components/User";
 import Graph from "@/components/Graph";
 
 export default {
@@ -17,5 +14,4 @@ export default {
 
 </script>
 <style scoped>
-
 </style>
