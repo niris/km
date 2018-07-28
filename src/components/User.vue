@@ -3,7 +3,7 @@
   <template v-if=!summary>
     <h1 v-if=create>&#8853; สมัครสมาชิก</h1>
     <h1 v-if=update><img src="/public/img/badge-13.svg"> My Account</h1>
-    <h1 v-if=search><img src="/public/img/badge-13.svg"> Account detail</h1>
+    <h1 v-if=search><img src="/public/img/badge-13.svg"> ข้อมูลสมาชิก </h1>
   </template>
 
   <div class=avatar v-if=user>
@@ -67,6 +67,9 @@
     <label>ความชำนาญรอง</label>
     <TagList v-if=edit :list=user.knowledge class=tags placeholder="New knowledge..." from="/api/user" name="knowledge[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.knowledge" :key=u>{{u}}</li></ul>
+    <label>ความรู้ที่อยากฝึกฝนเพิ่มเติม</label>
+    <TagList v-if=edit :list=user.additional class=tags placeholder="New additional knowledge..." from="/api/user" name="addtional[]"></TagList>
+    <ul v-else class=tags><li v-for="u in user.additional" :key=u>{{u}}</li></ul>
 
     <label>คำอธิบายเพิ่มเติม</label>
     <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" :value=user.description rows=15 />

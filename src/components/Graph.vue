@@ -18,7 +18,16 @@
         </dl>
 
     </aside>
+<div class=grp> 
+<select class=select-present v-model="selected">
+  <option v-for="option in options" v-bind:value="option.value">
+    {{ option.text }}
+  </option>
+</select>
     <svg id=graph></svg>
+
+    </div> 
+
 	</div>
 </template>
 
@@ -27,39 +36,57 @@ export default {
   props: ["id"],
   data: () => ({
     userinfo: {},
-     seen: false
+    seen: false,
+    selected: "B",
+    options: [
+      { text: "กราฟสมบูรณ์", value: "A" },
+      { text: "ผู้เชี่ยวชาญ/ความชำนาญ", value: "B" },
+      { text: "ผู้เชี่ยวชาญ/หน่วยงาน", value: "C" },
+      { text: "ความชำนาญ/หน่วยงาน", value: "D" }
+    ]
   }),
   mounted() {
     this.load();
   },
 
   methods: {
-    load() {
+    load(option) {
       this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
         .then(r => r.json())
         .then(users =>
           this.graph(
-            this.id ? this.transform(users, true) : this.transform(users, false)
+            this.id
+              ? this.transform(users, true, option)
+              : this.transform(users, false, option)
           )
         );
       this.closeUserDialog();
     },
 
-    transform(users, ego) {
+    transform(users, ego, option) {
+      return this.option == "D"
+        ? this.domaindepartemnnt(users, ego, option)
+        : this.optiontransform(users, ego, option);
+    },
+
+    optiontransform(users, ego, option) {
       var nodes = [],
         links = [],
         domains_hash = {},
         department_hash = {};
 
       users.forEach(user => {
-        nodes.push({
-          id: user._id,
-          label: user.firstName,
-          group: 1,
-          level: 1,
-          avatar: user.avatar
-        });
-        if (ego) {
+        if (option != "D") {
+          nodes.push({
+            id: user._id,
+            label: user.firstName,
+            group: 1,
+            level: 1,
+            avatar: user.avatar
+          });
+        }
+
+        if ((option == "A" || option == "C") && option != "D") {
           links.push({
             source: user._id,
             target: user.department,
@@ -75,25 +102,46 @@ export default {
             strenght: 1
           });
         }
-        if (user.domain.constructor == String)
-          user.domain = user.domain.split(/\n/); // TODO REMOVE
 
-        user.domain.forEach(d => {
-          domains_hash[d] = true;
-          links.push({
-            source: user._id,
-            target: d,
-            relation: "competency",
-            strenght: 1
+        if (option != "C" && option != "D") {
+          if (user.domain.constructor == String)
+            user.domain = user.domain.split(/\n/); // TODO REMOVE
+
+          user.domain.forEach(d => {
+            domains_hash[d] = true;
+            links.push({
+              source: user._id,
+              target: d,
+              relation: "competency",
+              strenght: 1
+            });
           });
-        });
+        }
+
+        if (option == "D") {
+          if (user.domain.constructor == String)
+            user.domain = user.domain.split(/\n/); // TODO REMOVE
+
+          user.domain.forEach(d => {
+            domains_hash[d] = true;
+            department_hash[user.department] = true;
+            links.push({
+              source: user.department,
+              target: d,
+              relation: "competency",
+              strenght: 1
+            });
+          });
+        }
       });
 
-      Object.keys(domains_hash).forEach(d =>
-        nodes.push({ id: d, label: d, group: 3, level: 3 })
-      );
+      if (option != "C" || option == "D") {
+        Object.keys(domains_hash).forEach(d =>
+          nodes.push({ id: d, label: d, group: 3, level: 3 })
+        );
+      }
 
-      if (ego) {
+      if (option == "A" || option == "D" || option == "C") {
         Object.keys(department_hash).forEach(d =>
           nodes.push({ id: d, label: d, group: 2, level: 2 })
         );
@@ -451,8 +499,11 @@ export default {
     }
   },
   watch: {
+    selected: function(value) {
+      this.load(value);
+    },
     id: function(id) {
-      this.load();
+      this.load(this.selected);
     }
   }
 };
@@ -522,9 +573,9 @@ img.avatar {
 }
 
 .img-container .name {
-    margin-top: 5%;
-    text-align: center;
-    font-size: large;
+  margin-top: 5%;
+  text-align: center;
+  font-size: large;
 }
 
 dl {
@@ -549,9 +600,9 @@ dd {
   font-weight: lighter;
 }
 
-dd.router{
+dd.router {
   position: relative;
-  float:right;
+  float: right;
 }
 
 dd:after {
@@ -565,7 +616,20 @@ dd:after {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.4);
   z-index: 100;
+}
+
+select.select-present{
+    width:35%;
+    margin-left: 1.5%;
+    margin-top:1.5%;
+    background-color: hsl(hue, saturation, lightness);
+}
+
+.grp {
+  margin-top : 5%;
+border: 1px solid #ccc;
+    border-radius: 0.4em;
 }
 </style>
