@@ -16,7 +16,6 @@
 				 <dt><img src="/public/img/email-84.svg"></dt>
   				<dd><a :href="'mailto:'+userinfo.email">{{userinfo.email}}</a></dd>
         </dl>
-
     </aside>
 <div class=grp> 
 <select class=select-present v-model="selected">
@@ -37,7 +36,7 @@ export default {
     seen: false,
     selected: "B",
     options: [
-      { text: "กราฟสมบูรณ์", value: "A" },
+      { text: "ผู้เชี่ยวชาญ/ความชำนาญ/หน่วยงาน", value: "A" },
       { text: "ผู้เชี่ยวชาญ/ความชำนาญ", value: "B" },
       { text: "ผู้เชี่ยวชาญ/หน่วยงาน", value: "C" },
       { text: "ความชำนาญ/หน่วยงาน", value: "D" }

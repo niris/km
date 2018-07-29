@@ -23,36 +23,47 @@
 
   <div class="grid-m-a" v-if=user>
     <label>ชื่อ</label>
-    <input v-if=edit name=firstName autocomplete=given-name :value=user.firstName>
+    <input v-if=edit name=firstName autocomplete=given-name v-model=user.firstName>
     <p v-else>{{user.firstName}}</p>
     
     <label>นามสกุล</label>
-    <input v-if=edit name=lastName autocomplete=family-name :value=user.lastName>
+    <input v-if=edit name=lastName autocomplete=family-name v-model=user.lastName>
     <p v-else>{{user.lastName}}</p>
     
     <label>หน่วยงาน</label>
-    <input v-if=edit name=department autocomplete=organization :value=user.department>
+    <input v-if=edit name=department autocomplete=organization v-model=user.department>
     <p v-else>{{user.department}}</p>
-    
+  
+    <!--
+          <label>หน่วยงาน</label>
+
+    <select v-if=edit name=department class=selection v-model="user.department">
+  		<option v-for="option in options" v-bind:value="option.value">
+   		 {{ option.text }}
+  	</option>
+    </select>
+    <p v-else>{{user.department}}</p>
+  -->
+
     <label>ตำแหน่ง</label>
-    <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title :value=user.function list=suggests />
+    <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title v-model=user.function list=suggests />
     <p v-else>{{user.function}}</p>
     
     <template v-if="!summary">
     <label>วันที่เริ่มทำงาน</label>
-    <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" :value=user.startwork>
+    <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" v-model=user.startwork>
     <p v-else>{{user.startwork}}</p>
     
     <label>Email</label>
-    <input v-if=edit name=email autocomplete=email :value=user.email>
+    <input v-if=edit name=email autocomplete=email v-model=user.email>
     <p v-else><a :href="'mailto:'+user.email">{{user.email}}</a></p>
     
     <label>เบอร์โทรศัพท์</label>
-    <input v-if=edit name=phone type=tel autocomplete="tel-national" :value=user.phone>
+    <input v-if=edit name=phone type=tel autocomplete="tel-national" v-model=user.phone>
     <p v-else>{{user.phone}}</p>
     
     <label>ที่อยู่</label>
-    <input v-if=edit name=address autocomplete=street-address :value=user.address>
+    <input v-if=edit name=address autocomplete=street-address v-model=user.address>
     <p v-else>{{user.address}}</p>
     
     <label>ผลงานวิชาการ</label>
@@ -72,7 +83,7 @@
     <ul v-else class=tags><li v-for="u in user.additional" :key=u>{{u}}</li></ul>
 
     <label>คำอธิบายเพิ่มเติม</label>
-    <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" :value=user.description rows=15 />
+    <textarea v-if=edit name=description placeholder="ex. Nobody suspect that I'm a robot" v-model=user.description rows=15 />
     <p v-else v-html="md(user.description)"/>
   
     <label v-if=create>Login</label>
@@ -119,7 +130,13 @@ export default {
     editmode: false,
     img: null,
     avatar: null,
-    user: {}
+    user: {},
+    /*options: [
+      { text: "คณะเทคโนโลยีสารสนเทศ", value: "any" },
+
+      { text: "คณะ", value: "user" },
+      { text: "กิจกรรม", value: "activity" }
+    ]*/
   }),
   
   computed: {
@@ -143,7 +160,7 @@ export default {
     this.img.onload = () => {
       this.$el.querySelector("details").hidden = false;
       let canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 256;
+      canvas.width = canvas.height = 420;
       canvas
         .getContext("2d")
         .drawImage(
@@ -227,18 +244,6 @@ export default {
           this.load(this.id);
         })
         .catch(this.$root.$refs.toast);
-    },
-    graph({ nodes, links }) {
-      var width = window.innerWidth,
-        height = window.innerHeight;
-      var circleWidth = 10;
-      //TODO auto resize when change windows size
-      var svg = d3
-        .select("#graph")
-        .attr("width", width)
-        .attr("height", height);
-      // simulation setup with all forces
-      //console.log(nodes, links);
     }
   },
   watch: {
