@@ -7,11 +7,11 @@
       <div class="name"><router-link :to="'/user/'+ userinfo._id"> {{userinfo.firstName}} {{userinfo.lastName}}</router-link></div>
       </div>
       <dl>
-				<dt><img src="/public/img/home-52.svg"></dt>
+				<dt><img src="/public/img/home.svg"></dt>
   				<dd>{{userinfo.department}}</dd>
         <dt><img src="/public/img/briefcase-24.svg"></dt>
   				<dd>{{userinfo.function}}</dd>
-				<dt><img src="/public/img/layers-3.svg"></dt>
+				<dt><img src="/public/img/favourite.svg"></dt>
           <dd><ul class=tags><li v-for="u in userinfo.domain" :key=u>{{u}}</li><li class="tag2" v-for="u in userinfo.knowledge" :key=u>{{u}}</li></ul></dd>
 				 <dt><img src="/public/img/email-84.svg"></dt>
   				<dd><a :href="'mailto:'+userinfo.email">{{userinfo.email}}</a></dd>
@@ -25,9 +25,7 @@
   </option>
 </select>
     <svg id=graph></svg>
-
     </div> 
-
 	</div>
 </template>
 
@@ -625,6 +623,7 @@ select.select-present{
     margin-left: 1.5%;
     margin-top:1.5%;
     background-color: hsl(hue, saturation, lightness);
+    font-size: small;
 }
 
 .grp {

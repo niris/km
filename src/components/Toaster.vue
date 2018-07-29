@@ -17,7 +17,7 @@ export default {
 <style scoped>
 #toaster {
 	position: fixed;
-	left: 1em;
+	right: 1em;
 	top:1em;
 	background: #333;
 	border: 1px solid black;

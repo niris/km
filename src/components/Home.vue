@@ -14,7 +14,7 @@
 </select>
 		<button class="search-button">&#128269;</button>
 		</fieldset>
-		<div v-if=searchtext>
+		<div v-if="searchtext && !seen">
 		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> ผู้เชี่ยวชาญ </h2>
 		<ul v-if=users>
 			<li v-for="u in users">
@@ -27,7 +27,8 @@
 			<li v-for="a in activities"><router-link :to="{name:'Activity', params:{id:a._id}}">{{ a.type }} - {{ a.name }}</router-link> by <router-link :to="{name:'User', params:{id:a.u_id}}">{{ a.u_id }}</router-link></li>
 		</ul>
 </div>
-		<h4 v-if="activities && users && !users.length && !activities.length && !seen">  ไม่พบข้อมูลสำหรับการค้นหา &#9785; </h4>
+	
+	<h4 v-if="activities && users && !users.length && !activities.length && !seen">  ไม่พบข้อมูลสำหรับการค้นหา &#9785; </h4>
 
 	</form>
 </div>
@@ -44,9 +45,9 @@ export default {
   data: () => ({
     users: null,
     activities: null,
-		selected: "any",
-		seen: true,
-		searchtext: "",
+    selected: "any",
+    seen: true,
+    searchtext: "",
     options: [
       { text: "ทั้งหมด", value: "any" },
 
@@ -60,13 +61,13 @@ export default {
       this.sfetch($event.target)
         .then(req => req.json())
         .then(([u, a]) => ([this.users, this.activities] = [u, a]))
-				.catch(this.$root.$refs.toast);
-			this.seen=false;
-		},
-		flush(){
-			this.searchtext ="";	
-			this.seen=true;		
-		},
+        .catch(this.$root.$refs.toast);
+      this.seen = false;
+    },
+    flush() {
+      this.searchtext = "";
+      this.seen = true;
+    }
   }
 };
 </script>
@@ -110,33 +111,37 @@ h4 {
   justify-content: space-between;
 }
 
-.placeholder{
-	width:70%;
-	display:inline-block;
+.placeholder {
+  width: 70%;
+  display: inline-block;
 }
 
-.selection {	
-	position:relative;
-	width:17%;
-	display:inline-block;
-	margin-left :1%;
+.selection {
+  position: relative;
+  width: 20%;
+  display: inline-block;
+  margin-left: 1%;
+	margin-right:0.5%;
+	font-size: small;
+	padding-top:1.5%;
 }
 
-input.back-button{
-	background-color: rgba(255, 255, 255, 0.85);
-	width : 5%;
-	float : right;
+input.back-button {
+  background-color: rgba(255, 255, 255, 0.85);
+  width: 5%;
+  float: right;
 }
 
-button.search-button{
-	display: inline-block;
-	padding:0 0.1;
+button.search-button {
+  display: inline-block;
+  padding: 0 0.1;
 }
 
-fieldset a{
-	position:relative;
-	right:2em;
-	top:0;
+fieldset a {
+  position: relative;
+  display: inline;
+  right: 1.5em;
+	margin-right:-1em;
+  font-size: large;
 }
-
 </style>
