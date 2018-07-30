@@ -179,16 +179,18 @@ export default {
           .attr("viewBox", `0 0 ${width} ${height}`);
       }); */
 
-      var color = d3.scaleOrdinal([
+      var color = [
         "#2B2D42",
-        "#2B2D42",
-        "#972c02",
-        "#66c2a5",
+        "#29293d",
+        "#8B0000	",
+        "#808080",
         "#fc8d62",
         "#e78ac3"
-      ]);
+      ];
 
-      var font_size = ["1em", "1em", "1.2em"];
+
+
+      var font_size = ["0.75em", "1em", "0.9em"];
       var radius = 2; // USELESS !!
       var linkForce = d3
         .forceLink()
@@ -303,12 +305,14 @@ export default {
           if (d.level == 1) return width * -0.025;
         })
         .attr("fill", function(node) {
-          return color(node.level);
+          return color[node.level];
         })
         .call(dragDrop)
         .on("click", this.showpopup);
 
       textElements.exit().remove();
+
+      
       function mouseOver(n, i) {
         if (n.level != 2) {
           d3
@@ -332,9 +336,9 @@ export default {
           return n.id == node.id ? 700 : ["lighter", 700, 350][node.level - 1];
         });
 
-        // textElements.attr("fill", function(node) {
-        //   return getTextColor(node, neighbors);
-        // });
+        textElements.attr("fill", function(node) {
+           return getTextColor(node, neighbors);
+         });
 
         // textElements.attr("font-size", function(d) {
         //   return n.id == d.id ? "1.5em" : font_size[d.level - 1];
@@ -365,14 +369,18 @@ export default {
 
         textElements.attr("font-weight", function(node) {
           return ["lighter", 700, 350][node.level - 1];
-        });
+        })
+        .attr("fill", function(node) {
+          return color[node.level];
+        })
+        ;
       }
 
       function getNodeColor(node, neighbors) {
-        /* if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
-          return node.level == 1 ? "black" : "blue";
-        }*/
-        return color(node.level);
+        if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
+          return node.level == 1 ? "black" : "grey";
+        }else
+          return color[node.level];
       }
 
       function getNodeSize(node) {
@@ -388,9 +396,10 @@ export default {
       }
 
       function getTextColor(node, neighbors) {
-        return Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1
-          ? "#1D3557"
-          : "black";
+       if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
+          return "#000059";
+        }else
+          return color[node.level];
       }
 
       //neighbours

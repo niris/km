@@ -6,13 +6,13 @@
 <form method=GET action=/api/search v-on:submit.prevent=search>
 		<fieldset>
 		<input class=placeholder type=search name=keyword v-model="searchtext" placeholder="ใส่ keyword สำหรับค้นหา และกด Enter ...">
-		<a v-if="searchtext" @click=flush()>&times;</a>
+		<a v-if="searchtext || !seen" @click=flush()>&times;</a>
 		<select class=selection v-model="selected" name=type>
   		<option v-for="option in options" v-bind:value="option.value">
    		 {{ option.text }}
   	</option>
 </select>
-		<button class="search-button">&#128269;</button>
+		<button class="search-button">&#128269;&#xFE0E;</button>
 		</fieldset>
 		<div v-if="searchtext && !seen">
 		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> ผู้เชี่ยวชาญ </h2>
@@ -28,7 +28,7 @@
 		</ul>
 </div>
 	
-	<h4 v-if="activities && users && !users.length && !activities.length && !seen">  ไม่พบข้อมูลสำหรับการค้นหา &#9785; </h4>
+	<div title="*ใส่คำค้นหาใหม่อีกครั้ง หรือ คลิกที่เครื่องหมาย x เพื่อกลับไปยังหน้าหลัก" v-if="activities && users && !users.length && !activities.length && !seen">  <h4>ไม่พบข้อมูลที่ค้นหา &#9785;&#xFE0E;</h4></div>
 
 	</form>
 </div>
@@ -112,7 +112,7 @@ h4 {
 }
 
 .placeholder {
-  width: 70%;
+  width: 67.5%;
   display: inline-block;
 }
 
@@ -133,6 +133,7 @@ input.back-button {
 }
 
 button.search-button {
+  width:9.5%;
   display: inline-block;
   padding: 0 0.1;
 }
@@ -143,5 +144,13 @@ fieldset a {
   right: 1.5em;
 	margin-right:-1em;
   font-size: large;
+}
+
+.consigne a:hover{
+  margin-top:2em;
+  font-size: 0.5em;
+  color: darkgray;
+  bottom:0;
+  margin-right:0;
 }
 </style>

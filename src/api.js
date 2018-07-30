@@ -137,7 +137,7 @@ api.get('/search', (req, res) => {
 // catch any mongo/express Errors
 api.use((err, req, res, next) => { console.error(err.stack); res.status(500).json(err) });
 
-mongodb.MongoClient.connect('mongodb://user:password@127.0.0.1:27017/?authSource=admin', {})
+mongodb.MongoClient.connect('mongodb://user:password@127.0.0.1:27017/?authSource=admin', {useNewUrlParser:true})
 	.then(c => db = c.db("km"))
 	.catch(err => console.log(err));
 
