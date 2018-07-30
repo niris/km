@@ -122,9 +122,11 @@ api.get('/search', (req, res) => {
 		return db.collection('activities').find({ $text: { $search: req.query.keyword } }).toArray()
 			.then(doc => res.json([[], doc]))
 	} else if (req.query.type == "user") {
-		var keys = req.query.keyword.split(" ").map(x => new RegExp("^" + x + "$", "i"))
+		return db.collection('users').find({ $text: { $search: req.query.keyword } }).toArray()
+			.then(doc => res.json([[], doc]))
+		/*var keys = req.query.keyword.split(" ").map(x => new RegExp("^" + x + "$", "i"))
 		return db.collection('users').find({ $or: [{ firstName: { $in: keys } }, { lastName: { $in: keys } }] }).toArray()
-			.then(doc => res.json([doc, []]))
+			.then(doc => res.json([doc, []]))*/
 	} else {
 		let p = ['users', 'activities'].map(d => db.collection(d).find({ $text: { $search: req.query.keyword } }).toArray());
 		return Promise.all(p).then(doc => res.json(doc));
