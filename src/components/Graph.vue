@@ -191,17 +191,17 @@ export default {
 
 
       var font_size = ["0.75em", "1em", "0.9em"];
-      var radius = 2; // USELESS !!
+      var radius = 2 ; // USELESS !!
       var linkForce = d3
         .forceLink()
         .id(l => l.id)
         .strength(l => l.strenght)
-        .distance(width * 0.15);
+        .distance(width * 0.1);
 
       var simulation = d3
         .forceSimulation()
         .force("link", linkForce)
-        .force("charge", d3.forceManyBody().strength(-width))
+        .force("charge", d3.forceManyBody().strength(-150))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("y", d3.forceY(0.01))
         .force("x", d3.forceX(0.01));
