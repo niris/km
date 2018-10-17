@@ -10,4 +10,4 @@ const dist = express.static(path.join(__dirname,'../dist'));
 app.use(dist, require('connect-history-api-fallback')(), dist);
 
 app.use((err, req, res, next) => {console.error(err.stack);res.status(500).json(err)});
-app.listen(port, ()=>console.log(`Started on http://localhost:${port}`));
+app.listen(port, ()=>console.log(`Express listening on :${port}`));

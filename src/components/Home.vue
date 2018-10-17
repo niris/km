@@ -15,7 +15,7 @@
 		<button class="search-button">&#128269;&#xFE0E;</button>
 		</fieldset>
 		<div v-if="searchtext && !seen">
-		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> ผู้เชี่ยวชาญ </h2>
+		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> บุคลากร </h2>
 		<ul v-if=users>
 			<li v-for="u in users">
 				<router-link :to="{name:'User', params:{id:u._id}}">{{ u.firstName }} {{ u.lastName }} - {{u.function}} {{u.department}}</router-link>
@@ -51,7 +51,7 @@ export default {
     options: [
       { text: "ทั้งหมด", value: "any" },
 
-      { text: "ผู้เชี่ยวชาญ", value: "user" },
+      { text: "บุคลากร", value: "user" },
       { text: "กิจกรรม", value: "activity" }
     ]
   }),

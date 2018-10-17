@@ -2,8 +2,8 @@ var express = require('express'), db
 	, bodyParser = require('body-parser')
 	, mongodb = require('mongodb')
 	, path = require('path');
-
-hash = (pwd) => require('crypto').createHash('sha1').update('your_salt').update(pwd).digest('hex');
+const mongologin = `mongodb://${process.env.MONGO_USER||"user"}:${process.env.MONGO_PASS||"password"}@${process.env.MONGO_HOST||"127.0.0.1"}:${process.env.MONGO_PORT||"27017"}/?authSource=admin`;
+hash = (pwd) => require('crypto').createHash('sha1').update(process.env.SALT||"your_salt").update(pwd).digest('hex');
 fromToken = (usr, h) => hash(usr) == h ? usr : null;
 toToken = (id) => [id, hash(id)].join(' ');
 noPass = (obj) => { delete obj.password; return obj }
@@ -62,6 +62,46 @@ api.get('/user/:_id/proj', (req, res) => { //a revoir
 				})
 		})
 })
+
+
+api.get('/user/:_id/projOPT', (req, res) => { //a revoir
+	db.collection('users')
+		.aggregate([
+			{ $match: { _id: req.params._id } },
+			{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1, avatar: 1} }
+		]).toArray()
+		.then(r1 => {
+			db.collection('users')
+				.aggregate([{ $unwind: '$domain' },
+					{ $match: { $or: [{ department: r1[0].department }, { domain: { $in: r1[0].domain||[] } }] } },
+					{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: '$domain', knowledge: 1, avatar: 1} },
+					{ $group: { _id: { _id: '$_id', firstName: '$firstName', lastName: '$lastName', department: '$department', avatar: '$avatar',}, domain: { $push: '$domain' } } }
+				]).toArray()
+				.then(r2 => {
+					res.json(r2.map(v => { v._id.domain = v.domain; return v._id }))
+				})
+		})
+})
+
+api.get('/user/:_id/projDomain', (req, res) => { //a revoir
+	db.collection('users')
+		.aggregate([
+			{ $match: { _id: req.params._id } },
+			{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1, avatar: 1} }
+		]).toArray()
+		.then(r1 => {
+			db.collection('users')
+				.aggregate([{ $unwind: '$domain' },
+					{ $match: { domain: { $in: r1[0].domain||[] }}},
+					{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: '$domain', knowledge: 1, avatar: 1} },
+					{ $group: { _id: { _id: '$_id', firstName: '$firstName', lastName: '$lastName', department: '$department', avatar: '$avatar',}, domain: { $push: '$domain' } } }
+				]).toArray()
+				.then(r2 => {
+					res.json(r2.map(v => { v._id.domain = v.domain; return v._id }))
+				})
+		})
+})
+
 api.post('/users', (req, res) => {
 	var write, col = db.collection('users');
 	["domain","publications","knowledge"].forEach(n=>req.body[n]=req.body[n].filter(e=>e!==''))
@@ -121,6 +161,7 @@ api.get('/search', (req, res) => {
 	if (req.query.type == "activity") {
 		return db.collection('activities').find({ $text: { $search: req.query.keyword } }).toArray()
 			.then(doc => res.json([[], doc]))
+
 	} else if (req.query.type == "user") {
 		/*return db.collection('users').find({ $text: { $search: req.query.keyword } }).toArray()
 			.then(doc => res.json([[], doc]))
@@ -137,11 +178,39 @@ api.get('/search', (req, res) => {
 })
 
 
+
+api.get('/search2', (req, res) => {
+	if (req.query.type == "activity") {
+
+		var keys = req.query.keyword
+		return db.collection('activities').find({ $or: [{ name: { $regex: keys } }, { tags: { $regex: keys}}, {description: { $regex: keys}}, {conclusion :{ $regex: keys}}]}).toArray()
+                        .then(doc => res.json([doc, []]))
+
+		//return db.collection('activities').find({ $text: { $search: req.query.keyword } }).toArray()
+		//	.then(doc => res.json([[], doc]))
+
+	} else if (req.query.type == "user") {
+		/*return db.collection('users').find({ $text: { $search: req.query.keyword } }).toArray()
+			.then(doc => res.json([[], doc]))
+		var keys = req.query.keyword.split(" ").map(x => new RegExp("^" + x + "$", "i"))
+		return db.collection('users').find({ $or: [{ firstName: { $in: keys } }, { lastName: { $in: keys } }] }).toArray()
+			.then(doc => res.json([doc, []]))*/
+		var keys = req.query.keyword
+		return db.collection('users').find({ $or: [{ firstName: { $regex: keys } }, { lastName: { $regex: keys}}]}).toArray()
+                        .then(doc => res.json([doc, []]))
+	} else {
+		let p = ['users', 'activities'].map(d => db.collection(d).find({ $text: { $search: req.query.keyword } }).toArray());
+		return Promise.all(p).then(doc => res.json(doc));
+	}
+})
+
 // catch any mongo/express Errors
 api.use((err, req, res, next) => { console.error(err.stack); res.status(500).json(err) });
 
-mongodb.MongoClient.connect('mongodb://user:password@127.0.0.1:27017/?authSource=admin', {useNewUrlParser:true})
-	.then(c => db = c.db("km"))
-	.catch(err => console.log(err));
-
+setInterval(function() {
+      if(!db)mongodb.MongoClient.connect(mongologin, {useNewUrlParser:true})
+      .then(c => db = c.db(process.env.MONGO_BASE||"km"))
+      .catch(e => {db = null; console.log(e);});
+}, 5000);
+	
 module.exports = api;

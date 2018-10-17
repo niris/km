@@ -17,15 +17,18 @@
   				<dd><a :href="'mailto:'+userinfo.email">{{userinfo.email}}</a></dd>
         </dl>
     </aside>
-<div class=grp> 
-<select class=select-present v-model="selected">
-  <option v-for="option in options" v-bind:value="option.value">
+    <div class=grp> 
+    <select v-if="!id" class=select-present v-model="selected">
+    <option v-for="option in options" v-bind:value="option.value">
     {{ option.text }}
-  </option>
-</select>
+    </option>
+    </select>
     <svg id=graph></svg>
-    </div> 
-	</div>
+    </div>
+    <div class=fab v-if="!summary && !id">
+      <button onclick="graph.webkitRequestFullScreen()">⤡</button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -36,10 +39,11 @@ export default {
     seen: false,
     selected: "B",
     options: [
-      { text: "ผู้เชี่ยวชาญ/ความชำนาญ/หน่วยงาน", value: "A" },
-      { text: "ผู้เชี่ยวชาญ/ความชำนาญ", value: "B" },
-      { text: "ผู้เชี่ยวชาญ/หน่วยงาน", value: "C" },
+      { text: "บุคลากร/ความชำนาญ/หน่วยงาน", value: "A" },
+      { text: "บุคลากร/ความชำนาญ", value: "B" },
+      { text: "บุคลากร/หน่วยงาน", value: "C" },
       { text: "ความชำนาญ/หน่วยงาน", value: "D" }
+      //{ text: "เลือกกราฟความสัมพันธ์", value: "F" }
     ]
   }),
   mounted() {
@@ -48,7 +52,9 @@ export default {
 
   methods: {
     load(option) {
-      this.sfetch(this.id ? `/api/user/${this.id}/proj` : "/api/user/proj")
+      this.sfetch(
+        this.id ? `/api/user/${this.id}/projDomain` : "/api/user/proj"
+      )
         .then(r => r.json())
         .then(users =>
           this.graph(
@@ -73,7 +79,7 @@ export default {
         department_hash = {};
 
       users.forEach(user => {
-        if (option != "D") {
+        if (option == "F") {
           nodes.push({
             id: user._id,
             label: user.firstName,
@@ -81,55 +87,81 @@ export default {
             level: 1,
             avatar: user.avatar
           });
-        }
 
-        if ((option == "A" || option == "C") && option != "D") {
-          links.push({
-            source: user._id,
-            target: user.department,
-            relation: "work",
-            strenght: 1
+          users.forEach(u => {
+            if (u._id != user._id && u.department == user.department) {
+              var index = nodes.findIndex(x => x._id == u._id);
+              if (index === -1) {
+                nodes.push({
+                  id: user._id,
+                  label: user.firstName,
+                  group: 1,
+                  level: 1,
+                  avatar: user.avatar
+                });
+              }
+            }
           });
+        } else {
+          if (option != "D") {
+            var i;
+            nodes.push({
+              id: user._id,
+              label: user.firstName,
+              group: 1,
+              level: 1,
+              avatar: user.avatar
+            });
+          }
 
-          department_hash[user.department] = true;
-          links.push({
-            source: user._id,
-            target: user.department,
-            relation: "work",
-            strenght: 1
-          });
-        }
-
-        if (option != "C" && option != "D") {
-          if (user.domain.constructor == String)
-            user.domain = user.domain.split(/\n/); // TODO REMOVE
-
-          user.domain.forEach(d => {
-            domains_hash[d] = true;
+          if ((option == "A" || option == "C") && option != "D") {
             links.push({
               source: user._id,
-              target: d,
-              relation: "competency",
+              target: user.department,
+              relation: "work",
               strenght: 1
             });
-          });
-        }
 
-        if (option == "D") {
-          if (user.domain.constructor == String)
-            user.domain = user.domain.split(/\n/); // TODO REMOVE
-
-          user.domain.forEach(d => {
-            domains_hash[d] = true;
             department_hash[user.department] = true;
             links.push({
-              source: user.department,
-              target: d,
-              relation: "competency",
+              source: user._id,
+              target: user.department,
+              relation: "work",
               strenght: 1
             });
-          });
-        }
+          }
+
+          if (option != "C" && option != "D") {
+            if (user.domain.constructor == String)
+              user.domain = user.domain.split(/\n/); // TODO REMOVE
+
+            user.domain.forEach(d => {
+              domains_hash[d] = true;
+              links.push({
+                source: user._id,
+                target: d,
+                relation: "competency",
+                strenght: 1
+              });
+            });
+          }
+
+          if (option == "D") {
+            if (user.domain.constructor == String)
+              user.domain = user.domain.split(/\n/); // TODO REMOVE
+
+            user.domain.forEach(d => {
+              domains_hash[d] = true;
+              department_hash[user.department] = true;
+              links.push({
+                source: user.department,
+                target: d,
+                relation: "competency",
+                strenght: 1
+              });
+            });
+          }
+        } // else if option = f
       });
 
       if (option != "C" || option == "D") {
@@ -149,8 +181,8 @@ export default {
 
     graph({ nodes, links }) {
       // var elem = document.querySelector("#graph");
-      var width = 720,
-        height = 720;
+      var width = 1000,
+        height = 1000;
 
       d3
         .select("#graph")
@@ -169,16 +201,6 @@ export default {
         )
         .append("g");
 
-      /* window.addEventListener("resize", function() {
-        var elem = document.querySelector("#graph");
-        (width = elem.clientWidth), (height = elem.clientHeight);
-        svg = d3
-          .select("#graph")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("viewBox", `0 0 ${width} ${height}`);
-      }); */
-
       var color = [
         "#2B2D42",
         "#29293d",
@@ -188,10 +210,8 @@ export default {
         "#e78ac3"
       ];
 
-
-
       var font_size = ["0.75em", "1em", "0.9em"];
-      var radius = 2 ; // USELESS !!
+      var radius = 2; // USELESS !!
       var linkForce = d3
         .forceLink()
         .id(l => l.id)
@@ -285,7 +305,7 @@ export default {
         .data(nodes)
         .enter()
         .append("text")
-        .text(node => node.label)
+        .text(node => node.label.substring(0,15))
         .attr("font-size", function(node) {
           return font_size[node.level - 1];
         })
@@ -312,7 +332,6 @@ export default {
 
       textElements.exit().remove();
 
-      
       function mouseOver(n, i) {
         if (n.level != 2) {
           d3
@@ -337,8 +356,8 @@ export default {
         });
 
         textElements.attr("fill", function(node) {
-           return getTextColor(node, neighbors);
-         });
+          return getTextColor(node, neighbors);
+        });
 
         // textElements.attr("font-size", function(d) {
         //   return n.id == d.id ? "1.5em" : font_size[d.level - 1];
@@ -367,20 +386,19 @@ export default {
           .attr("stroke-width", 1)
           .attr("stroke", "rgba(50, 50, 50, 0.2)");
 
-        textElements.attr("font-weight", function(node) {
-          return ["lighter", 700, 350][node.level - 1];
-        })
-        .attr("fill", function(node) {
-          return color[node.level];
-        })
-        ;
+        textElements
+          .attr("font-weight", function(node) {
+            return ["lighter", 700, 350][node.level - 1];
+          })
+          .attr("fill", function(node) {
+            return color[node.level];
+          });
       }
 
       function getNodeColor(node, neighbors) {
         if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
           return node.level == 1 ? "black" : "grey";
-        }else
-          return color[node.level];
+        } else return color[node.level];
       }
 
       function getNodeSize(node) {
@@ -396,10 +414,9 @@ export default {
       }
 
       function getTextColor(node, neighbors) {
-       if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
+        if (Array.isArray(neighbors) && neighbors.indexOf(node.id) > -1) {
           return "#000059";
-        }else
-          return color[node.level];
+        } else return color[node.level];
       }
 
       //neighbours
@@ -626,17 +643,24 @@ dd:after {
   z-index: 100;
 }
 
-select.select-present{
-    width:35%;
-    margin-left: 1.5%;
-    margin-top:1.5%;
-    background-color: hsl(hue, saturation, lightness);
-    font-size: small;
+select.select-present {
+  width: 35%;
+  margin-left: 1.5%;
+  margin-top: 1.5%;
+  background-color: hsl(hue, saturation, lightness);
+  font-size: small;
 }
 
 .grp {
-  margin-top : 5%;
-border: 1px solid #ccc;
-    border-radius: 0.4em;
+  margin-top: 5%;
+  border: 1px solid #ccc;
+  border-radius: 0.4em;
 }
+
+
+:-webkit-full-screen	{
+
+  background-color: white;
+}
+
 </style>
