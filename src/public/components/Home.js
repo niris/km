@@ -15,14 +15,14 @@ const template = `
 		<button class="search-button">&#128269;&#xFE0E;</button>
 		</fieldset>
 		<div v-if="searchtext && !seen">
-		<h2 v-if="users && users.length"><img src="/public/img/single-01.svg"> บุคลากร </h2>
+		<h2 v-if="users && users.length"><img src="https://icongr.am/material/account.svg"> บุคลากร </h2>
 		<ul v-if=users>
 			<li v-for="u in users">
 				<router-link :to="{name:'User', params:{id:u._id}}">{{ u.firstName }} {{ u.lastName }} - {{u.function}} {{u.department}}</router-link>
 				{{user}}
 			</li>
 		</ul>
-		<h2 v-if="activities && activities.length"><img src="/public/img/calendar-60.svg"> กิจกรรม </h2>
+		<h2 v-if="activities && activities.length"><img src="https://icongr.am/material/calendar.svg"> กิจกรรม </h2>
 		<ul v-if=activities>
 			<li v-for="a in activities"><router-link :to="{name:'Activity', params:{id:a._id}}">{{ a.type }} - {{ a.name }}</router-link> by <router-link :to="{name:'User', params:{id:a.u_id}}">{{ a.u_id }}</router-link></li>
 		</ul>

@@ -7,13 +7,13 @@ const template = `
       <div class="name"><router-link :to="'/user/'+ userinfo._id"> {{userinfo.firstName}} {{userinfo.lastName}}</router-link></div>
       </div>
       <dl>
-				<dt><img src="/public/img/home.svg"></dt>
+				<dt><img src="https://icongr.am/material/home.svg"></dt>
   				<dd>{{userinfo.department}}</dd>
-        <dt><img src="/public/img/briefcase-24.svg"></dt>
+        <dt><img src="https://icongr.am/material/briefcase.svg"></dt>
   				<dd>{{userinfo.function}}</dd>
-				<dt><img src="/public/img/favourite.svg"></dt>
+				<dt><img src="https://icongr.am/material/star.svg"></dt>
           <dd><ul class=tags><li v-for="u in userinfo.domain" :key=u>{{u}}</li><li class="tag2" v-for="u in userinfo.knowledge" :key=u>{{u}}</li></ul></dd>
-				 <dt><img src="/public/img/email-84.svg"></dt>
+				 <dt><img src="https://icongr.am/material/email.svg"></dt>
   				<dd><a :href="'mailto:'+userinfo.email">{{userinfo.email}}</a></dd>
         </dl>
     </aside>

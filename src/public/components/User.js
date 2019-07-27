@@ -2,8 +2,8 @@ const template=`
 <form class=user v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/users>
   <template v-if=!props.summary>
     <h1 v-if=create>&#8853; สมัครสมาชิก</h1>
-    <h1 v-if=update><img src="/public/img/badge-13.svg"> My Account</h1>
-    <h1 v-if=search><img src="/public/img/badge-13.svg"> ข้อมูลสมาชิก </h1>
+    <h1 v-if=update>My Account</h1>
+    <h1 v-if=search>ข้อมูลสมาชิก </h1>
   </template>
 
   <div class=avatar v-if=user>
@@ -94,7 +94,7 @@ const template=`
   </div>
 	<datalist id=suggests></datalist>
   <template v-if="!create && !props.summary">
-    <h2><img src="/public/img/calendar-60.svg"> รายการกิจกรรม</h2>
+    <h2><img src="https://icongr.am/material/calendar.svg"> รายการกิจกรรม</h2>
     <ul v-if="user.activities && user.activities.length">
       <li v-for="a in user.activities" :key=a._id>
         <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>

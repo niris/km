@@ -60,26 +60,6 @@ app.get('/user/:_id/proj', (req, res) => { //a revoir
 		})
 })
 
-
-app.get('/user/:_id/projOPT', (req, res) => { //a revoir
-	db.collection('users')
-		.aggregate([
-			{ $match: { _id: req.params._id } },
-			{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: 1, avatar: 1} }
-		]).toArray()
-		.then(r1 => {
-			db.collection('users')
-				.aggregate([{ $unwind: '$domain' },
-					{ $match: { $or: [{ department: r1[0].department }, { domain: { $in: r1[0].domain||[] } }] } },
-					{ $project: { _id: 1, firstName: 1, lastName: 1, department: 1, domain: '$domain', knowledge: 1, avatar: 1} },
-					{ $group: { _id: { _id: '$_id', firstName: '$firstName', lastName: '$lastName', department: '$department', avatar: '$avatar',}, domain: { $push: '$domain' } } }
-				]).toArray()
-				.then(r2 => {
-					res.json(r2.map(v => { v._id.domain = v.domain; return v._id }))
-				})
-		})
-})
-
 app.get('/user/:_id/projDomain', (req, res) => { //a revoir
 	db.collection('users')
 		.aggregate([
