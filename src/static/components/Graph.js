@@ -54,7 +54,7 @@ export default {
   methods: {
     load(option) {
       this.sfetch(
-        this.id ? `/user/${this.id}/projDomain` : "/user/proj"
+        this.id ? `/user/${this.id}/neighbors` : "/user/"
       )
         .then(r => r.json())
         .then(users =>
