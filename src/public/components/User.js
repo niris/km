@@ -1,6 +1,6 @@
-<template>
-<form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/users>
-  <template v-if=!summary>
+const template=`
+<form class=user v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/users>
+  <template v-if=!props.summary>
     <h1 v-if=create>&#8853; สมัครสมาชิก</h1>
     <h1 v-if=update><img src="/public/img/badge-13.svg"> My Account</h1>
     <h1 v-if=search><img src="/public/img/badge-13.svg"> ข้อมูลสมาชิก </h1>
@@ -49,7 +49,7 @@
     <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title v-model=user.function list=suggests />
     <p v-else>{{user.function}}</p>
     
-    <template v-if="!summary">
+    <template v-if="!props.summary">
     <label>วันที่เริ่มทำงาน</label>
     <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" v-model=user.startwork>
     <p v-else>{{user.startwork}}</p>
@@ -67,19 +67,19 @@
     <p v-else>{{user.address}}</p>
     
     <label>ผลงานวิชาการ</label>
-    <TagList v-if=edit :list=user.publications placeholder="New Publication..." from="/api/user" name="publications[]"></TagList>
+    <TagList v-if=edit :list=user.publications placeholder="New Publication..." from="/user" name="publications[]"></TagList>
     <ul v-else><li v-for="u in user.publications" :key=u>{{u}}</li></ul>
     </template>
     
     <label>ความชำนาญหลัก</label>
-    <TagList v-if=edit :list=user.domain class=tags placeholder="New Domain..." from="/api/user" name="domain[]"></TagList>
+    <TagList v-if=edit :list=user.domain class=tags placeholder="New Domain..." from="/user" name="domain[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.domain" :key=u>{{u}}</li></ul>
     
     <label>ความชำนาญรอง</label>
-    <TagList v-if=edit :list=user.knowledge class=tags placeholder="New knowledge..." from="/api/user" name="knowledge[]"></TagList>
+    <TagList v-if=edit :list=user.knowledge class=tags placeholder="New knowledge..." from="/user" name="knowledge[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.knowledge" :key=u>{{u}}</li></ul>
     <label>ความรู้ที่อยากฝึกฝนเพิ่มเติม</label>
-    <TagList v-if=edit :list=user.additional class=tags placeholder="New additional knowledge..." from="/api/user" name="addtional[]"></TagList>
+    <TagList v-if=edit :list=user.additional class=tags placeholder="New additional knowledge..." from="/user" name="addtional[]"></TagList>
     <ul v-else class=tags><li v-for="u in user.additional" :key=u>{{u}}</li></ul>
 
     <label>คำอธิบายเพิ่มเติม</label>
@@ -93,36 +93,35 @@
     <input v-if=edit name=password type=password placeholder="unchanged" :value="''" autocomplete="current-password">
   </div>
 	<datalist id=suggests></datalist>
-  <template v-if="!create && !summary">
+  <template v-if="!create && !props.summary">
     <h2><img src="/public/img/calendar-60.svg"> รายการกิจกรรม</h2>
     <ul v-if="user.activities && user.activities.length">
       <li v-for="a in user.activities" :key=a._id>
         <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
-        <form v-on:submit.prevent=activityDelete method=DELETE :action="'/api/activity/'+a._id" style="display:inline">
+        <form v-on:submit.prevent=activityDelete method=DELETE :action="'/activity/'+a._id" style="display:inline">
           <button title="delete" style="padding: 0;width: 2em;">❌</button>
         </form>
       </li>
     </ul>
     <p v-else>ไม่พบกิจกรรม</p>
   </template>
-  <div class=fab v-if="!summary">
+  <div class=fab v-if="!props.summary">
     <button v-if="create" title="Create">✓</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
     <button v-if="update&&edit" v-on:click.prevent="editmode=avatar=false" title="Cancel">✕</button>
     <button v-if="update&&edit" title="Update">✓</button>
   </div>
-  <template v-if="!edit&&!summary">
+  <template v-if="!edit&&!props.summary">
 	<Graph :id=this.id></Graph>
 	</template>
 </form>
-</template>
+`
 
-<script>
-import Graph from "@/components/Graph";
-import TagList from "@/components/TagList";
+import Graph from "./Graph.js";
+import TagList from "./TagList.js";
 
 export default {
-
+  template,
   components: { Graph, TagList },
   props: ["id", "summary"],
   
@@ -191,7 +190,7 @@ export default {
     autocomplete(event) {
       var name = event.target.name.match(/\w+/)[0];
       var value = event.target.value;
-      this.sfetch("/api/user", { [name]: value })
+      this.sfetch("/user", { [name]: value })
         .then(r => r.json())
         .then(users => {
           var val = [...new Set([].concat(...users.map(u => u[name])))].filter(
@@ -206,7 +205,7 @@ export default {
     load(id) {
       this.user = { domain: [], publications: [], knowledge: [] };
       if (!id) return;
-      this.sfetch(`/api/user/${id}`)
+      this.sfetch(`/user/${id}`)
         .then(res => res.json())
         .then(json => (this.user = json))
         .catch(err => this.$root.$refs.toast);
@@ -252,39 +251,3 @@ export default {
     }
   }
 };
-</script>
-<style scoped>
-h1 {
-  text-align: left;
-}
-
-h2{
-  margin-top: 10%;
-  text-align: left;
-}
-.avatar {
-  text-align: center;
-  position: relative;
-}
-.avatar input[type="file"] {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 256px;
-  opacity: 0;
-  cursor: pointer;
-}
-.avatar img {
-  border-radius: 100%;
-  box-shadow: 0 0 0.2em 0px;
-  width: 256px;
-  height: 256px;
-  background-size: contain;
-}
-.imgedit {
-  background: #f4f4f4;
-  box-shadow: 0 0.05em 0.3em inset;
-  padding: 0 1em;
-  border-radius: 0.3em;
-}
-</style>

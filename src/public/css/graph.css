@@ -1,0 +1,129 @@
+.graph aside {
+  margin: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 80vw;
+  max-width: 400px;
+  z-index: 150;
+  padding: 5em 0 0 0;
+  background: rgba(255, 255, 255, 0.9);
+  overflow: auto;
+  box-shadow: black 0 0 1em;
+}
+.graph aside nav {
+  position: absolute;
+  top: 6em;
+  right: 1em;
+}
+
+@media screen and (max-width: 960px) {
+  .graph .fab {
+    right: 0.5em;
+  }
+}
+
+#graph {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  vertical-align: center;
+  overflow: hidden;
+  padding: 0;
+}
+
+.graph img.avatar {
+  border-radius: 100%;
+  box-shadow: 0 0 0.2em 0px;
+  width: 50%;
+  height: 50%;
+  background-size: contain;
+}
+
+.graph #button-close {
+  position: absolute;
+  top: 5px;
+  right: 0px;
+  /*background-color: #1d3557;*/
+}
+
+.graph .img-container {
+  position: relative;
+  margin: auto;
+  width: 200px;
+  height: 120px;
+  margin-bottom: 150px;
+}
+
+.graph .img-container img {
+  width: 100%;
+  height: auto;
+}
+
+.graph .img-container .name {
+  margin-top: 5%;
+  text-align: center;
+  font-size: large;
+}
+
+.graph dl {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  line-height: 3;
+}
+.graph dt {
+  position: relative;
+  float: left;
+  clear: left;
+  width: 10%;
+  margin-left: 5%;
+  font-weight: 550;
+}
+.graph dd {
+  width: 80%;
+  margin-left: 20%;
+  font-weight: lighter;
+}
+
+.graph dd.router {
+  position: relative;
+  float: right;
+}
+
+.graph dd:after {
+  content: "\a";
+  white-space: pre;
+}
+
+.graph .close-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 100;
+}
+
+.graph select.select-present {
+  width: 35%;
+  margin-left: 1.5%;
+  margin-top: 1.5%;
+  background-color: hsl(hue, saturation, lightness);
+  font-size: small;
+}
+
+.graph .grp {
+  margin-top: 5%;
+  border: 1px solid #ccc;
+  border-radius: 0.4em;
+}
+
+
+:-webkit-full-screen	{
+  background-color: white;
+}

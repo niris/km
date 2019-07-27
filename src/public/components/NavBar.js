@@ -1,4 +1,4 @@
-<template>
+const template = `
 	<nav>
 		<a href=//km.reru.ac.th class=logo>
 		<svg width="48px" height="48px" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -19,16 +19,16 @@
 			<router-link :to="{name:'User', params:{id:this.$root.me}}">My profile</router-link>
 			<button v-on:click=logout title="Sign Out"><svg xmlns="http://www.w3.org/2000/svg" width="22px" height="16px" viewBox="-4 0 32 32"><path d="m 18,24 0,4 -14,0 0,-24 14,0 0,4 4,0 0,-8 -22,0 0,32 22,0 0,-8 z m -6,-4.003 0,-8 12,0 0,-4 8,8 -8,8 0,-4 z" /></svg></button>
 		</template>
-		<form v-else v-on:submit.prevent="login($event.target)" method=POST action=/api/token>
+		<form v-else v-on:submit.prevent="login($event.target)" method=POST action=/token>
 			<input placeholder=👤 name=_id autocomplete="username">
 			<input placeholder=🔑 name=password type=password autocomplete="current-password">
 			<button title="Sign In"><svg xmlns="http://www.w3.org/2000/svg" width="22px" height="16px" viewBox="-4 0 32 32"><path d="m 14,24 v 4 H 28 V 4 H 14 V 8 H 10 V 0 H 32 V 32 H 10 V 24 Z M 6,20 V 12 H 18 V 8 l 8,8 -8,8 v -4 z" /></svg></button>
 		</form>
 	</nav>
-</template>
+`
 
-<script>
 export default {
+  template,
   methods: {
     login(form) {
       this.sfetch(form)
@@ -40,61 +40,3 @@ export default {
     }
   }
 };
-</script>
-<style scoped>
-@media only print{
-  nav {
-    display:none!important;
-  }
-}
-nav {
-  position: sticky;
-  top: 0;
-  z-index: 99;
-  background: white;
-  display: flex;
-  justify-content: space-around;
-  max-width:768px;
-  align-items: center;
-  box-shadow: 0 0.5em 0.5em -0.5em;
-  padding: 0.5em 0;
-  background: #1d3557;
-  border-radius: 0 0 .5em .5em;
-  margin: auto;
-}
-.logo {
-  font-size: 0;
-}
-.logo svg {
-  vertical-align: center;
-}
-@media only screen and (min-width: 760px) {
-  .logo {
-    font-size: 2em;
-    font-family: serif;
-  }
-}
-nav a,
-nav a:hover {
-  color: #fff;
-  margin: 0 0.5em;
-  text-align: center;
-  text-transform: capitalize;
-  line-height: 1em;
-}
-nav a.router-link-exact-active {
-	text-decoration: underline;
-}
-nav form {
-  display: inline-flex;
-}
-nav form input[placeholder] {
-  width: 6em;
-}
-::-webkit-input-placeholder {
-  text-align: right;
-}
-input:-moz-placeholder {
-  text-align: right;
-}
-</style>

@@ -1,5 +1,5 @@
-<template>
-<form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/api/activity>
+const template = `
+<form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/activity>
   <h1 v-if=create>&#8853; เพิ่มกิจกรรมใหม่</h1>
   <h1 v-if=update>My Activity</h1>
   <h1 v-if=search>Activity detail</h1>
@@ -47,7 +47,7 @@
     <div v-else v-html="md(activity.conclusion||'')"/>
 
     <label>Tags</label>
-    <TagList v-if=edit :list=activity.tags class=tags placeholder="New Tag..." from="/api/activity" name="tags[]"></TagList>
+    <TagList v-if=edit :list=activity.tags class=tags placeholder="New Tag..." from="/activity" name="tags[]"></TagList>
     <ul v-else class=tags>
       <li v-for="t in activity.tags" :key=t>{{t}} </li>
     </ul>
@@ -61,11 +61,11 @@
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
   </div>
 </form>
-</template>
+`
 
-<script>
-import TagList from "@/components/TagList";
+import TagList from "./TagList.js";
 export default {
+  template,
   components: {TagList},
   props: ["id"],
   data: () => ({
@@ -128,7 +128,7 @@ export default {
     load(id) {
       this.activity = {};
       if (!id) return;
-      this.sfetch(`/api/activity/${id}`)
+      this.sfetch(`/activity/${id}`)
         .then(res => res.json())
         .then(json => {
           if (!json) throw new Error("no such template");
@@ -138,7 +138,3 @@ export default {
     }
   }
 };
-</script>
-<style scoped>
-
-</style>

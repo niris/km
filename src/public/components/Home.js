@@ -1,9 +1,9 @@
-<template>
-	<div>
+const template = `
+	<div class=home>
     <div class="head">
     <h1>RERU Experts lookup</h1>
 
-<form method=GET action=/api/search v-on:submit.prevent=search>
+<form method=GET action=/search v-on:submit.prevent=search>
 		<fieldset>
 		<input class=placeholder type=search name=keyword v-model="searchtext" placeholder="ใส่ keyword สำหรับค้นหา และกด Enter ...">
 		<a v-if="searchtext || !seen" @click=flush()>&times;</a>
@@ -35,12 +35,12 @@
 <div class="grp">  
     <Graph v-if="seen" id=""></Graph>
 	</div>
-  	</div>
-</template>
+</div>
+`
 
-<script>
-import Graph from "@/components/Graph";
+import Graph from "./Graph.js";
 export default {
+  template,
   components: { Graph },
   data: () => ({
     users: null,
@@ -50,7 +50,6 @@ export default {
     searchtext: "",
     options: [
       { text: "ทั้งหมด", value: "any" },
-
       { text: "บุคลากร", value: "user" },
       { text: "กิจกรรม", value: "activity" }
     ]
@@ -70,87 +69,3 @@ export default {
     }
   }
 };
-</script>
-
-<style scoped>
-h1 {
-  font-size: 200%;
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-h2 {
-  font-size: 150%;
-  text-align: left;
-}
-
-h4 {
-  margin-top: 5%;
-  font-size: 125%;
-  text-align: center;
-  color: #a9a9a9;
-}
-
-.head {
-  height: 25%;
-}
-
-.grp {
-  height: 75%;
-}
-
-.search-desc {
-  margin-top: 50px;
-  margin-left: 50px;
-}
-
-.flex-space-between {
-  padding: 0;
-  display: flex;
-  list-style: none;
-  justify-content: space-between;
-}
-
-.placeholder {
-  width: 67.5%;
-  display: inline-block;
-}
-
-.selection {
-  position: relative;
-  width: 20%;
-  display: inline-block;
-  margin-left: 1%;
-	margin-right:0.5%;
-	font-size: small;
-	padding-top:1.5%;
-}
-
-input.back-button {
-  background-color: rgba(255, 255, 255, 0.85);
-  width: 5%;
-  float: right;
-}
-
-button.search-button {
-  width:9.5%;
-  display: inline-block;
-  padding: 0 0.1;
-}
-
-fieldset a {
-  position: relative;
-  display: inline;
-  right: 1.5em;
-	margin-right:-1em;
-  font-size: large;
-}
-
-.consigne a:hover{
-  margin-top:2em;
-  font-size: 0.5em;
-  color: darkgray;
-  bottom:0;
-  margin-right:0;
-}
-</style>

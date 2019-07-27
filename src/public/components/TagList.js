@@ -1,17 +1,17 @@
-<template>
+const template = `
 <ul>
-<li v-for="elem in values" :key=elem.id>
+<li v-for="elem in values" :key=elem.id style="position:relative">
 	<input @keyup=inflate @focusout=deflate v-model=elem.title :placeholder=placeholder :list=datalistId :name=name >
-	<a v-if="values&&values.length" @click=remove(elem)>&times;</a>
+	<a v-if="values&&values.length" @click=remove(elem) style="position:absolute;right:.2em;top:0;">&times;</a>
 </li>
 <datalist :id=datalistId>
 	<option v-for="d in datalist" :key=d>{{d}}</option>
 </datalist>
 </ul>
-</template>
+`
 
-<script>
 export default {
+	template,
 	props: ["list", "placeholder", "name", "from"],
 	data: () => ({
 		nextId:0,
@@ -60,14 +60,3 @@ export default {
 		this.inflate();
   },
 };
-</script>
-<style scoped>
-li{
-	position:relative;
-}
-li a{
-	position:absolute;
-	right:.2em;
-	top:0;
-}
-</style>

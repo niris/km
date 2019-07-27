@@ -1,7 +1,30 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+<!DOCTYPE html>
+<html lang=th>
+<meta charset="utf-8">
+<title>RERU Knowlege Management</title>
+<meta name=viewport content="width=device-width,initial-scale=1.0">
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<link rel=stylesheet href="https://cdnjs.cloudflare.com/ajax/libs/marx/3.0.3/marx.min.css">
+<link rel=stylesheet href="/public/css/home.css">
+<link rel=stylesheet href="/public/css/user.css">
+<link rel=stylesheet href="/public/css/style.css">
+<link rel=stylesheet href="/public/css/navbar.css">
+<link rel=stylesheet href="/public/css/graph.css">
+<script src="http://d3js.org/d3.v5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.4.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
 
-Vue.use(Router)
+<div id=app>
+	<nav-bar></nav-bar>
+	<main>
+		<router-view />
+	</main>
+	<Toaster />
+</div>
+
+<script src="https://unpkg.com/vue@2"></script>
+<script src="https://unpkg.com/vue-router@3"></script>
+<script type=module>
 Vue.mixin({
   methods: {
     sfetch(form, query="") {
@@ -25,14 +48,15 @@ Vue.mixin({
   }
 })
 
-import App from '@/App'
-import Home from '@/components/Home'
-import Activity from '@/components/Activity'
-import User from '@/components/User'
+import NavBar from "./public/components/NavBar.js";
+import Toaster from "./public/components/Toaster.js";
+import Home from './public/components/Home.js'
+import Activity from './public/components/Activity.js'
+import User from './public/components/User.js'
 
 new Vue({
   el: '#app',
-  render: h => h(App),
+	components: { NavBar, Toaster },
   data: function () {
     return {
       get token() { return localStorage.getItem('token') || ''; },
@@ -41,7 +65,7 @@ new Vue({
     };
   },
 
-  router: new Router({
+  router: new VueRouter({
     mode: 'history',
     routes: [
       { path: '/', name: "Home", component: Home },
@@ -50,4 +74,4 @@ new Vue({
     ]
   }),
 })
-
+</script>

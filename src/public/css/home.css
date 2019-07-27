@@ -1,0 +1,80 @@
+.home h1 {
+  font-size: 200%;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.home h2 {
+  font-size: 150%;
+  text-align: left;
+}
+
+.home h4 {
+  margin-top: 5%;
+  font-size: 125%;
+  text-align: center;
+  color: #a9a9a9;
+}
+
+.home .head {
+  height: 25%;
+}
+
+.home .grp {
+  height: 75%;
+}
+
+.home .search-desc {
+  margin-top: 50px;
+  margin-left: 50px;
+}
+
+.home .flex-space-between {
+  padding: 0;
+  display: flex;
+  list-style: none;
+  justify-content: space-between;
+}
+
+.home .placeholder {
+  width: 67.5%;
+  display: inline-block;
+}
+
+.home .selection {
+  position: relative;
+  width: 20%;
+  display: inline-block;
+  margin-left: 1%;
+	margin-right:0.5%;
+	font-size: small;
+	padding-top:1.5%;
+}
+
+.home input.back-button {
+  background-color: rgba(255, 255, 255, 0.85);
+  width: 5%;
+  float: right;
+}
+
+.home button.search-button {
+  width:9.5%;
+  display: inline-block;
+  padding: 0 0.1;
+}
+
+.home fieldset a {
+  position: relative;
+  display: inline;
+  right: 1.5em;
+	margin-right:-1em;
+  font-size: large;
+}
+
+.home .consigne a:hover{
+  margin-top:2em;
+  font-size: 0.5em;
+  color: darkgray;
+  bottom:0;
+  margin-right:0;
+}

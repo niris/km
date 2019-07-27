@@ -1,5 +1,5 @@
-<template>
-  <div>
+const template = `
+  <div class=graph>
     <div v-if="seen" class= close-area id=close v-on:click=closeUserDialog></div>
     <aside class=sidebar id=userDialog hidden>  
       <div class="img-container">
@@ -25,19 +25,20 @@
     </select>
     <svg id=graph></svg>
     </div>
-    <div class=fab v-if="!summary && !id">
+    <div class=fab v-if="!id">
       <button onclick="graph.webkitRequestFullScreen()">⤡</button>
     </div>
   </div>
-</template>
+`
 
-<script>
 export default {
+  template,
   props: ["id"],
   data: () => ({
     userinfo: {},
     seen: false,
     selected: "B",
+    avatar: null, //whut ?
     options: [
       { text: "บุคลากร/ความชำนาญ/หน่วยงาน", value: "A" },
       { text: "บุคลากร/ความชำนาญ", value: "B" },
@@ -53,7 +54,7 @@ export default {
   methods: {
     load(option) {
       this.sfetch(
-        this.id ? `/api/user/${this.id}/projDomain` : "/api/user/proj"
+        this.id ? `/user/${this.id}/projDomain` : "/user/proj"
       )
         .then(r => r.json())
         .then(users =>
@@ -507,7 +508,7 @@ export default {
     showpopup(node) {
       if (node.level == 1) {
         console.log(node.id);
-        this.sfetch("/api/user/" + node.id)
+        this.sfetch("/user/" + node.id)
           .then(r => r.json())
           .then(json => {
             this.userinfo = json;
@@ -530,137 +531,3 @@ export default {
     }
   }
 };
-</script>
-<style scoped>
-aside {
-  margin: 0;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 80vw;
-  max-width: 400px;
-  z-index: 150;
-  padding: 5em 0 0 0;
-  background: rgba(255, 255, 255, 0.9);
-  overflow: auto;
-  box-shadow: black 0 0 1em;
-}
-aside nav {
-  position: absolute;
-  top: 6em;
-  right: 1em;
-}
-
-@media screen and (max-width: 960px) {
-  .fab {
-    right: 0.5em;
-  }
-}
-
-#graph {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  vertical-align: center;
-  overflow: hidden;
-  padding: 0;
-}
-
-img.avatar {
-  border-radius: 100%;
-  box-shadow: 0 0 0.2em 0px;
-  width: 50%;
-  height: 50%;
-  background-size: contain;
-}
-
-#button-close {
-  position: absolute;
-  top: 5px;
-  right: 0px;
-  /*background-color: #1d3557;*/
-}
-
-.img-container {
-  position: relative;
-  margin: auto;
-  width: 200px;
-  height: 120px;
-  margin-bottom: 150px;
-}
-
-.img-container img {
-  width: 100%;
-  height: auto;
-}
-
-.img-container .name {
-  margin-top: 5%;
-  text-align: center;
-  font-size: large;
-}
-
-dl {
-  position: absolute;
-  width: 100%;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-  line-height: 3;
-}
-dt {
-  position: relative;
-  float: left;
-  clear: left;
-  width: 10%;
-  margin-left: 5%;
-  font-weight: 550;
-}
-dd {
-  width: 80%;
-  margin-left: 20%;
-  font-weight: lighter;
-}
-
-dd.router {
-  position: relative;
-  float: right;
-}
-
-dd:after {
-  content: "\a";
-  white-space: pre;
-}
-
-.close-area {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.4);
-  z-index: 100;
-}
-
-select.select-present {
-  width: 35%;
-  margin-left: 1.5%;
-  margin-top: 1.5%;
-  background-color: hsl(hue, saturation, lightness);
-  font-size: small;
-}
-
-.grp {
-  margin-top: 5%;
-  border: 1px solid #ccc;
-  border-radius: 0.4em;
-}
-
-
-:-webkit-full-screen	{
-
-  background-color: white;
-}
-
-</style>
