@@ -50,11 +50,11 @@ class Search(Resource):
 		arg = request.args
 		# print(request.args.get("type")
 		if arg.get("type") == "activity":
-			return db.activities.find({"$text":{"$search":arg.get("keyword")}})
+			return list(db.activities.find({"$text":{"$search":arg.get("keyword")}}))
 		elif arg.get("type") == "user":
-			return db.users.find({ "$or": [{ "firstName": { "$regex": arg.get("keyword") } }, { "lastName": { "$regex": arg.get("keyword")}}]})
+			return list(db.users.find({ "$or": [{ "firstName": { "$regex": arg.get("keyword") } }, { "lastName": { "$regex": arg.get("keyword")}}]}))
 		else:
-			return map(lambda x: db.x.find({ "$text": { "$search": arg.get("keyword") } }), ['users', 'activities'])
+			return list(map(lambda x: db.x.find({ "$text": { "$search": arg.get("keyword") } }), ['users', 'activities']))
 
 @api.resource('/activity/','/activity/<activity_id>')
 class Activity(Resource):
