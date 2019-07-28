@@ -3,14 +3,14 @@ const template = `
     <div class="head">
     <h1>RERU Experts lookup</h1>
 
-<form method=GET action=/search v-on:submit.prevent=search>
+    <form v-on:submit.prevent=search>
 		<fieldset>
 		<input class=placeholder type=search name=keyword v-model="searchtext" placeholder="ใส่ keyword สำหรับค้นหา และกด Enter ...">
 		<a v-if="searchtext || !seen" @click=flush()>&times;</a>
 		<select class=selection v-model="selected" name=type>
-  		<option v-for="option in options" v-bind:value="option.value">
-   		 {{ option.text }}
-  	</option>
+<option v-for="option in options" v-bind:value="option.value">
+{{ option.text }}
+</option>
 </select>
 		<button class="search-button">&#128269;&#xFE0E;</button>
 		</fieldset>
@@ -57,10 +57,7 @@ export default {
   methods: {
     search($event) {
       this.users = this.activities = null;
-      this.sfetch($event.target)
-        .then(req => req.json())
-        .then(([u, a]) => ([this.users, this.activities] = [u, a]))
-        .catch(this.$root.$refs.toast);
+      this.rest("/search", 'GET', $event.target.json()).then(([u, a]) => ([this.users, this.activities] = [u, a]))
       this.seen = false;
     },
     flush() {

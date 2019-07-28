@@ -1,5 +1,5 @@
 const template = `
-<form v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/activity>
+<form v-on:submit.prevent=post @keydown.esc="editmode=false">
   <h1 v-if=create>&#8853; เพิ่มกิจกรรมใหม่</h1>
   <h1 v-if=update>My Activity</h1>
   <h1 v-if=search>Activity detail</h1>
@@ -81,12 +81,12 @@ export default {
     },
     update: function() {
       return (
-        this.activity.u_id && this.$root.token.startsWith(this.activity.u_id)
+        this.activity.u_id && $auth.get.name.startsWith(this.activity.u_id)
       );
     },
     search: function() {
       return (
-        this.activity.u_id && !this.$root.token.startsWith(this.activity.u_id)
+        this.activity.u_id && !$auth.get.name.startsWith(this.activity.u_id)
       );
     }
   },
@@ -115,26 +115,20 @@ export default {
       if(document.activeElement instanceof HTMLInputElement){
         return $event.target[[].slice.call($event.target).findIndex(i=>i==document.activeElement)+1].focus()
       }
-
-      this.sfetch($event.target).then(res=>res.json())
-      .then(r => {
+      this.rest('/activity', 'POST', $event.target.json()).then(r => {
         this.$root.$refs.toast("Activity saved");
         if(r.insertedIds)this.$router.push({ name: "Activity", params: { id: r.insertedIds[0] } });
         else this.load(this.$route.params.id);
         this.editmode = false;
       })
-      .catch(this.$root.$refs.toast)
     },
     load(id) {
       this.activity = {};
       if (!id) return;
-      this.sfetch(`/activity/${id}`)
-        .then(res => res.json())
-        .then(json => {
-          if (!json) throw new Error("no such template");
-          this.activity = json;
-        })
-        .catch(this.$root.$refs.toast);
+      this.rest(`/activity/${id}`).then(json => {
+        if (!json) throw new Error("no such template");
+        this.activity = json;
+      })
     }
   }
 };

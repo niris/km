@@ -46,10 +46,9 @@ export default {
 			if(!this.name||!this.from||!event)return;
 			var name = this.name.match(/\w+/)[0];
 			var value = event.target.value;
-			this.sfetch(this.from,{[name]:value})
-			.then(r=>r.json()).then(res => {
+			this.rest(this.from, 'GET',{[name]:value}).then(res => {
 				this.datalist = [...new Set([].concat(...res.map(u => u[name])))].filter(m => m.match(value));
-			}).catch(console.error)
+			})
 		},
 		value() {
 			return this.values.map(e=>e.title).filter(e=>e!=='');

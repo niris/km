@@ -1,6 +1,6 @@
 const template=`
-<form class=user v-on:submit.prevent=post method=POST @keydown.esc="editmode=false" action=/users>
-  <template v-if=!props.summary>
+<form class=user v-on:submit.prevent=post @keydown.esc="editmode=false">
+  <template v-if=!summary>
     <h1 v-if=create>&#8853; สมัครสมาชิก</h1>
     <h1 v-if=update>My Account</h1>
     <h1 v-if=search>ข้อมูลสมาชิก </h1>
@@ -48,8 +48,7 @@ const template=`
     <label>ตำแหน่ง</label>
     <input v-if=edit name=function placeholder="ex. Professor" autocomplete=organization-title v-model=user.function list=suggests />
     <p v-else>{{user.function}}</p>
-    
-    <template v-if="!props.summary">
+    <template v-if="!summary">
     <label>วันที่เริ่มทำงาน</label>
     <input v-if=edit name=startwork type=date :max="new Date().toISOString().split('T')[0]" v-model=user.startwork>
     <p v-else>{{user.startwork}}</p>
@@ -93,25 +92,25 @@ const template=`
     <input v-if=edit name=password type=password placeholder="unchanged" :value="''" autocomplete="current-password">
   </div>
 	<datalist id=suggests></datalist>
-  <template v-if="!create && !props.summary">
+  <template v-if="!create && !summary">
     <h2><img src="https://icongr.am/material/calendar.svg"> รายการกิจกรรม</h2>
     <ul v-if="user.activities && user.activities.length">
       <li v-for="a in user.activities" :key=a._id>
         <router-link :to="{name:'Activity', params:{id:a._id}}">{{a.name}}</router-link>
-        <form v-on:submit.prevent=activityDelete method=DELETE :action="'/activity/'+a._id" style="display:inline">
+        <form v-on:submit.prevent="activityDelete(a._id)" style="display:inline">
           <button title="delete" style="padding: 0;width: 2em;">❌</button>
         </form>
       </li>
     </ul>
     <p v-else>ไม่พบกิจกรรม</p>
   </template>
-  <div class=fab v-if="!props.summary">
+  <div class=fab v-if="!summary">
     <button v-if="create" title="Create">✓</button>
     <button v-if="update&&!edit" v-on:click.prevent="editmode=true" title="Edit">✎</button>
     <button v-if="update&&edit" v-on:click.prevent="editmode=avatar=false" title="Cancel">✕</button>
     <button v-if="update&&edit" title="Update">✓</button>
   </div>
-  <template v-if="!edit&&!props.summary">
+  <template v-if="!edit&&!summary">
 	<Graph :id=this.id></Graph>
 	</template>
 </form>
@@ -132,7 +131,6 @@ export default {
     user: {},
     /*options: [
       { text: "คณะเทคโนโลยีสารสนเทศ", value: "any" },
-
       { text: "คณะ", value: "user" },
       { text: "กิจกรรม", value: "activity" }
     ]*/
@@ -146,10 +144,10 @@ export default {
       return !this.id;
     },
     update: function() {
-      return this.id && this.$root.token.startsWith(this.id);
+      return this.id && this.$auth.get.name.startsWith(this.id);
     },
     search: function() {
-      return this.id && !this.$root.token.startsWith(this.id);
+      return this.id && !this.$auth.get.name.startsWith(this.id);
     }
   },
   
@@ -187,28 +185,21 @@ export default {
     md(text) {
       return text ? marked(text, { sanitize: true }) : "";
     },
-    autocomplete(event) {
-      var name = event.target.name.match(/\w+/)[0];
-      var value = event.target.value;
-      this.sfetch("/user", { [name]: value })
-        .then(r => r.json())
-        .then(users => {
-          var val = [...new Set([].concat(...users.map(u => u[name])))].filter(
-            m => m.match(value) && value != m
-          );
-          var el = document.getElementById("suggests");
-          el.innerHTML = val ? val.map(s => "<option>" + s + "</option>") : "";
-          //console.log(val, el.innerHTML);
-        })
-        .catch(console.error);
+    autocomplete($event) {
+      var name = $event.target.name.match(/\w+/)[0];
+      var value = $event.target.value;
+      this.rest("/user", 'GET', {[name]: value}).then(users => {
+        var val = [...new Set([].concat(...users.map(u => u[name])))].filter(
+          m => m.match(value) && value != m
+        );
+        var el = document.getElementById("suggests");
+        el.innerHTML = val ? val.map(s => "<option>" + s + "</option>") : "";
+      })
     },
     load(id) {
       this.user = { domain: [], publications: [], knowledge: [] };
       if (!id) return;
-      this.sfetch(`/user/${id}`)
-        .then(res => res.json())
-        .then(json => (this.user = json))
-        .catch(err => this.$root.$refs.toast);
+      this.rest(`/user/${id}`).then(json => (this.user = json))
       scrollTo(0,0);
     },
     post($event) {
@@ -219,30 +210,24 @@ export default {
             .findIndex(i => i == document.activeElement) + 1
         ].focus();
       }
-      this.sfetch($event.target)
-        .then(req => req.json())
-        .then(r => {
-          if (this.create) {
-            this.$root.$refs.toast(
-              `Profil Created ! You are now connected as ${r._id}`
-            );
-            this.$router.push({ name: "User", params: { id: r._id } });
-          } else {
-            this.$root.$refs.toast("Profil Updated");
-            this.load(this.id);
-            this.editmode = false;
-          }
-        })
-        .catch(this.$root.$refs.toast);
-    },
-    activityDelete($event) {
-      this.sfetch($event.target)
-        .then(req => req.json())
-        .then(r => {
-          this.$root.$refs.toast("Activity Deleted");
+      this.rest('/users', "POST",$event.target.json()).then(r => {
+        if (this.create) {
+          this.$root.$refs.toast(
+            `Profil Created ! You are now connected as ${r._id}`
+          );
+          this.$router.push({ name: "User", params: { id: r._id } });
+        } else {
+          this.$root.$refs.toast("Profil Updated");
           this.load(this.id);
-        })
-        .catch(this.$root.$refs.toast);
+          this.editmode = false;
+        }
+      });
+    },
+    activityDelete(id) {
+      this.rest(`/activity/${id}`, 'DELETE').then(r => {
+        this.$root.$refs.toast("Activity Deleted");
+        this.load(this.id);
+      });
     }
   },
   watch: {

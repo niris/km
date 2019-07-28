@@ -19,7 +19,7 @@ const template = `
     </aside>
     <div class=grp> 
     <select v-if="!id" class=select-present v-model="selected">
-    <option v-for="option in options" v-bind:value="option.value">
+    <option v-for="option in options" :value=option.value>
     {{ option.text }}
     </option>
     </select>
@@ -53,16 +53,8 @@ export default {
 
   methods: {
     load(option) {
-      this.sfetch(
-        this.id ? `/user/${this.id}/neighbors` : "/user/"
-      )
-        .then(r => r.json())
-        .then(users =>
-          this.graph(
-            this.id
-              ? this.transform(users, true, option)
-              : this.transform(users, false, option)
-          )
+      this.rest(this.id ? `/user/${this.id}/neighbors` : "/user/").then(users =>
+          this.graph(this.transform(users, !!this.id, option))
         );
       this.closeUserDialog();
     },
@@ -176,7 +168,7 @@ export default {
           nodes.push({ id: d, label: d, group: 2, level: 2 })
         );
       }
-      console.log(nodes, links);
+      //console.log(nodes, links);
       return { nodes, links };
     },
 
@@ -507,14 +499,11 @@ export default {
 
     showpopup(node) {
       if (node.level == 1) {
-        console.log(node.id);
-        this.sfetch("/user/" + node.id)
-          .then(r => r.json())
-          .then(json => {
-            this.userinfo = json;
-            userDialog.hidden = false;
-            this.seen = true;
-          });
+        this.rest(`/user/${node.id}`).then(json => {
+          this.userinfo = json;
+          userDialog.hidden = false;
+          this.seen = true;
+        });
       }
     },
     closeUserDialog() {
