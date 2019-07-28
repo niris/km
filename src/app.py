@@ -15,7 +15,9 @@ db = MongoClient(MONGO_URI)[MONGO_DB]
 @app.before_request
 def before_request():
 	if "text/html" in request.accept_mimetypes.values():
-		return send_from_directory('static', 'index.html')
+		response = send_from_directory('static', 'index.html')
+		response.cache_control.max_age = 0
+		return response
 
 @api.resource('/user/', '/user/<user_id>')
 class User(Resource):
