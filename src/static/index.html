@@ -13,8 +13,8 @@
 <script src="http://d3js.org/d3.v5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.4.0/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
-<script src="https://unpkg.com/vue@2"></script>
-<script src="https://unpkg.com/vue-router@3"></script>
+<script src="https://unpkg.com/vue@2.6.10"></script>
+<script src="https://unpkg.com/vue-router@3.0.7"></script>
 
 <div id=app>
 	<nav>
@@ -55,11 +55,11 @@ Vue.prototype.rest = function(url, method = 'GET', body) {
 	.catch(this.$root.$refs.toast)
 }
 
-import $auth    from './static/$Auth.js'
-import Toaster  from "./static/Toaster.js";
-import Home     from './static/Home.js'
-import Activity from './static/Activity.js'
-import User     from './static/User.js'
+import $auth    from '/static/$Auth.js'
+import Toaster  from '/static/Toaster.js';
+import Home     from '/static/Home.js'
+import Activity from '/static/Activity.js'
+import User     from '/static/User.js'
 
 new Vue({
   el: '#app',
@@ -72,7 +72,7 @@ new Vue({
 		logout() {
 		  this.rest('/auth/', 'DELETE').then(this.$auth.logout)
 		}
-	}
+	},
 	router: new VueRouter({
 		mode: 'history',
 		routes: [

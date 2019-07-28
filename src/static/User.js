@@ -144,10 +144,10 @@ export default {
       return !this.id;
     },
     update: function() {
-      return this.id && this.$auth.get.name.startsWith(this.id);
+      return this.id && this.$auth.get.name == this.id;
     },
     search: function() {
-      return this.id && !this.$auth.get.name.startsWith(this.id);
+      return this.id && !this.$auth.get.name == this.id;
     }
   },
   
