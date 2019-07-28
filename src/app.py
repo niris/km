@@ -27,13 +27,17 @@ class User(Resource):
 @api.resource('/user/<user_id>/neighbors')
 class Neighbors(Resource):
 	def get(self,user_id):
+		# retrieve user information
 		user = list(db.users.aggregate([{ "$match": { "_id": user_id } },{ "$project": { "_id": 1, "firstName": 1, "lastName": 1, "department": 1, "domain": 1, "avatar": 1} }]))
+		#retrive neighbors having common domain of interests
 		neighbors = list(db.users.aggregate([
 			{ "$unwind": '$domain' },
 			{ "$match": { "domain": { "$in": user[0]["domain"] or [] }}},
 			{ "$project": { "_id": 1, "firstName": 1, "lastName": 1, "department": 1, "domain": '$domain', "knowledge": 1, "avatar": 1} },
+			# grooup by : group  informations of the same user in one row by merging domains in a list
 			{ "$group": { "_id": { "_id": '$_id', "firstName": '$firstName', "lastName": '$lastName', "department": '$department', "avatar": '$avatar',}, "domain": { "$push": '$domain' } } }
 		]))
+		# replace the list of agregated domains in the list of neighbors informations
 		def replace(x):
 			x["_id"]["domain"] = x["domain"]
 			return x["_id"]
