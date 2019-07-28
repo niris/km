@@ -7,7 +7,6 @@ from bson.json_util import dumps
 
 MONGO_URI = "mongodb://user:password@49.48.148.10:2030/km?authSource=admin"
 MONGO_DB = 'km'
-
 app = Flask(__name__)
 api = Api(app)
 db = MongoClient(MONGO_URI)[MONGO_DB]
@@ -45,6 +44,25 @@ class Neighbors(Resource):
 			return x["_id"]
 		return  list(map(lambda x: replace(x), neighbors))
 
+@api.resource('/search/')
+class Search(Resource):
+	def get(self):
+		arg = request.args
+		# print(request.args.get("type")
+		if arg.get("type") == "activity":
+			return db.activities.find({"$text":{"$search":arg.get("keyword")}})
+		elif arg.get("type") == "user":
+			return db.users.find({ "$or": [{ "firstName": { "$regex": arg.get("keyword") } }, { "lastName": { "$regex": arg.get("keyword")}}]})
+		else:
+			return map(lambda x: db.x.find({ "$text": { "$search": arg.get("keyword") } }), ['users', 'activities'])
+
+@api.resource('/activity/','/activity/<activity_id>')
+class Activity(Resource):
+	def get(self, activity_id=None):
+		if activity_id :
+			return db.activities.find_one({"_id":activity_id})
+		return list(db.activities.find({}))
+
 @api.resource('/auth/')
 class Auth(Resource):
 	secret = app.secret_key or "your-256-bit-secret"
@@ -81,5 +99,4 @@ class Auth(Resource):
 		return response
 
 if __name__ == '__main__':	
-	app.run() 
-
+	app.run()
