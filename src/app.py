@@ -47,14 +47,14 @@ class Neighbors(Resource):
 @api.resource('/search/')
 class Search(Resource):
 	def get(self):
-		arg = request.args
-		# print(request.args.get("type")
-		if arg.get("type") == "activity":
-			return list(db.activities.find({"$text":{"$search":arg.get("keyword")}}))
-		elif arg.get("type") == "user":
-			return list(db.users.find({ "$or": [{ "firstName": { "$regex": arg.get("keyword") } }, { "lastName": { "$regex": arg.get("keyword")}}]}))
+		kw = request.args.get("keyword")
+		tp = request.args.get("type")
+		if tp == "activity":
+			return [[], list(db.activities.find({"$text":{"$search":kw}}))]
+		elif tp == "user":
+			return [list(db.users.find({ "$or": [{ "firstName":{"$regex":kw}}, {"lastName":{"$regex": kw}}]})), []]
 		else:
-			return list(map(lambda x: db.x.find({ "$text": { "$search": arg.get("keyword") } }), ['users', 'activities']))
+			return list(map(lambda x: db.x.find({ "$text":{"$search": kw}}), ['users', 'activities']))
 
 @api.resource('/activity/','/activity/<activity_id>')
 class Activity(Resource):

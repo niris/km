@@ -19,7 +19,6 @@ const template = `
 		<ul v-if=users>
 			<li v-for="u in users">
 				<router-link :to="{name:'User', params:{id:u._id}}">{{ u.firstName }} {{ u.lastName }} - {{u.function}} {{u.department}}</router-link>
-				{{user}}
 			</li>
 		</ul>
 		<h2 v-if="activities && activities.length"><img src="https://icongr.am/material/calendar.svg"> กิจกรรม </h2>
