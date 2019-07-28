@@ -210,7 +210,7 @@ export default {
             .findIndex(i => i == document.activeElement) + 1
         ].focus();
       }
-      this.rest('/users', "POST",$event.target.json()).then(r => {
+      this.rest('/user', "POST",$event.target.json()).then(r => {
         if (this.create) {
           this.$root.$refs.toast(
             `Profil Created ! You are now connected as ${r._id}`

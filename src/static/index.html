@@ -49,9 +49,14 @@ HTMLFormElement.prototype.json = function () {
 </script>
 <script type=module>
 Vue.prototype.rest = function(url, method = 'GET', body) {
+	//GET caching
+	if(method == 'GET' && !body && url && localStorage[url])
+		return Promise.resolve(JSON.parse(localStorage[url]));
+	if(method != 'GET')
+		localStorage.clear()
 	if(method == 'GET' && body)url += '?' + Object.keys(body).reduce((a,k)=>(a.push(k + '=' + encodeURIComponent(body[k])),a),[]).join('&')
 	return fetch(url, {method, body: (method != 'GET') && body && JSON.stringify(body) || null})
-	.then(r => { if (!r.ok) throw Error(r.statusText); return r.json() })
+	.then(r => { if (!r.ok) throw Error(r.statusText); r.clone().text().then(txt => localStorage[url] = txt); return r.json() })
 	.catch(this.$root.$refs.toast)
 }
 
