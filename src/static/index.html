@@ -5,73 +5,81 @@
 <meta name=viewport content="width=device-width,initial-scale=1.0">
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel=stylesheet href="https://cdnjs.cloudflare.com/ajax/libs/marx/3.0.3/marx.min.css">
-<link rel=stylesheet href="/static/css/home.css">
-<link rel=stylesheet href="/static/css/user.css">
-<link rel=stylesheet href="/static/css/style.css">
-<link rel=stylesheet href="/static/css/navbar.css">
-<link rel=stylesheet href="/static/css/graph.css">
+<link rel=stylesheet href="/static/Home.css">
+<link rel=stylesheet href="/static/User.css">
+<link rel=stylesheet href="/static/style.css">
+<link rel=stylesheet href="/static/Navbar.css">
+<link rel=stylesheet href="/static/Graph.css">
 <script src="http://d3js.org/d3.v5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.4.0/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
+<script src="https://unpkg.com/vue@2"></script>
+<script src="https://unpkg.com/vue-router@3"></script>
 
 <div id=app>
-	<nav-bar></nav-bar>
+	<nav>
+		<a href=//km.reru.ac.th class=logo>
+		<img src=/static/logo.svg>
+		<span class="km" style=vertical-align:super>KM</span>
+		</a>
+		<router-link to=/> Experts lookup</router-link>
+		<router-link title="เพิ่มกิจกรรมใหม่" v-if=$auth.get.name to=/activity> Activity</router-link>
+		<router-link v-if=!$auth.get.name to=/user>Sign Up</router-link>
+		<template v-if=$auth.get.name>
+			<router-link :to="{name:'User', params:{id:this.$root.me}}">My profile</router-link>
+			<button v-on:click=logout title="Sign Out" style="line-height:0"><img src="https://icongr.am/material/logout.svg?size=24&color=FFFFFF"></button>
+		</template>
+		<form v-else v-on:submit.prevent="login($event.target)">
+			<input placeholder=👤 name=username autocomplete="username">
+			<input placeholder=🔑 name=password type=password autocomplete="current-password">
+			<button title="Sign In" style="line-height:0"><img src="https://icongr.am/material/login.svg?size=24&color=FFFFFF"></button>
+		</form>
+	</nav>
 	<main>
 		<router-view />
 	</main>
 	<Toaster />
 </div>
 
-<script src="https://unpkg.com/vue@2"></script>
-<script src="https://unpkg.com/vue-router@3"></script>
+<script>
+HTMLFormElement.prototype.json = function () {
+	ival = i => i.type=='number'?(i.value===''?'':+i.value):i.value;
+	return [].reduce.call(this, (d, i) => (i.name ? d[i.name] = ival(i) : 0, d), {})
+}
+</script>
 <script type=module>
-Vue.mixin({
-  methods: {
-    sfetch(form, query="") {
-      var params = { headers: { authorization: localStorage.token }, method: ((form.attributes||{}).method||{}).value || 'GET', query};
-      if (form instanceof HTMLFormElement) {
-        if (params.method.match(/^POST$/i)) params.body = new FormData(form);
-        else params.query = '?' + new URLSearchParams(new FormData(form));
-        params.path = new URL(form.action).pathname;
-      } else {
-        params.path = form;
-        params.query = '?'+Object.keys(params.query).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params.query[k])).join('&');
-      }
-      return fetch(params.path+params.query, params).then(r => {
-        if (!r.ok) throw Error(r.statusText);
-        if (r.headers.has('authorization')) {
-          this.$root.token = r.headers.get('authorization');
-        }
-        return r;
-      })
-    }
-  }
-})
+Vue.prototype.rest = function(url, method = 'GET', body) {
+	if(method == 'GET' && body)url += '?' + Object.keys(body).reduce((a,k)=>(a.push(k + '=' + encodeURIComponent(body[k])),a),[]).join('&')
+	return fetch(url, {method, body: (method != 'GET') && body && JSON.stringify(body) || null})
+	.then(r => { if (!r.ok) throw Error(r.statusText); return r.json() })
+	.catch(this.$root.$refs.toast)
+}
 
-import NavBar from "./static/components/NavBar.js";
-import Toaster from "./static/components/Toaster.js";
-import Home from './static/components/Home.js'
-import Activity from './static/components/Activity.js'
-import User from './static/components/User.js'
+import $auth    from './static/$Auth.js'
+import Toaster  from "./static/Toaster.js";
+import Home     from './static/Home.js'
+import Activity from './static/Activity.js'
+import User     from './static/User.js'
 
 new Vue({
   el: '#app',
-	components: { NavBar, Toaster },
-  data: function () {
-    return {
-      get token() { return localStorage.getItem('token') || ''; },
-      set token(v) { localStorage.setItem('token', v) },
-      get me() { return (localStorage.getItem('token') || '').split(' ')[0]; },
-    };
-  },
-
-  router: new VueRouter({
-    mode: 'history',
-    routes: [
-      { path: '/', name: "Home", component: Home },
-      { path: '/activity/:id?', name: "Activity", component: Activity, props: true },
-      { path: '/user/:id?', name: "User", component: User, props: true },
-    ]
-  }),
+	components: { Toaster },
+	methods: {
+		login(form) {
+			this.rest('/auth/', 'POST', form.json())
+			.then(r => this.$auth.login(this.$root.$refs.toast("Welcome !")))
+		},
+		logout() {
+		  this.rest('/auth/', 'DELETE').then(this.$auth.logout)
+		}
+	}
+	router: new VueRouter({
+		mode: 'history',
+		routes: [
+			{ path: '/', name: "Home", component: Home },
+			{ path: '/activity/:id?', name: "Activity", component: Activity, props: true },
+			{ path: '/user/:id?', name: "User", component: User, props: true },
+		]
+	}),
 })
 </script>

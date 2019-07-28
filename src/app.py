@@ -62,7 +62,11 @@ class Auth(Resource):
 			response.set_cookie(name, '', httponly=http, expires=0)
 		return response
 	def post(self):
+		import hashlib
 		user = request.get_json(True) # ... or request.form.to_dict() ?
+		password = hashlib.sha1(str('your_salt' + user['password']).encode('utf-8')).hexdigest()
+		if not db.users.find_one({'_id':user['username'], 'password': password }):
+			abort(403)
 		payload = {'name': user['username']}
 		token = jwt.encode(payload, Auth.secret)
 		response = make_response(jsonify(token))
