@@ -113,10 +113,10 @@ app.get('/activity/:_id', (req, res) => {
 		.then(r => res.json(r))
 })
 app.delete('/activity/:_id', (req, res) => {
-	if (!req.user) return res.sendStatus(401);
+	if (!g.user) return res.sendStatus(401);
 	var col = db.collection('activities');
 	console.log(req.params._id, req.user);
-	col.findOneAndDelete({ _id: req.params._id, u_id: req.user })
+	col.findOneAndDelete({ _id: req.params._id, u_id: g.user })
 	.then(cmd=> res.status(cmd.ok ? 200 : 404).json(cmd))
 	.catch(console.error)
 })

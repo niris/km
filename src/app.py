@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import types, jwt, time, datetime
-from flask import Flask, request, send_from_directory, make_response, abort, jsonify
+from flask import Flask, request, send_from_directory, make_response, abort, jsonify,g
 from flask_restful import Api, Resource
 from pymongo import MongoClient
 from bson.json_util import dumps
 
-MONGO_URI = "mongodb://user:password@49.48.148.10:2030/km?authSource=admin"
+MONGO_URI = "mongodb://user:password@223.204.13.26:2030/km?authSource=admin"
 MONGO_DB = 'km'
 app = Flask(__name__)
 api = Api(app)
 db = MongoClient(MONGO_URI)[MONGO_DB]
+
 
 @app.before_request
 def before_request():
@@ -17,6 +18,7 @@ def before_request():
 		response = send_from_directory('static', 'index.html')
 		response.cache_control.max_age = 0
 		return response
+	
 
 @api.resource('/user/', '/user/<user_id>')
 class User(Resource):
@@ -63,6 +65,22 @@ class Activity(Resource):
 			return db.activities.find_one({"_id":activity_id})
 		return list(db.activities.find({}))
 
+	def delete(self,activity_id):
+		res = db.activities.find_one_and_delete({"_id" : activity_id, "u_id": g.user['name'] })
+		print(g.user['name'], activity_id)
+		if not res : abort(404)
+		return res
+
+	def post(self):
+		activ = {**request.get_json(True), 'u_id' : g.user['name'] }
+		print(activ)
+		activ['tags'] = list(filter(lambda x: x != '', activ['tags']))
+		if activ['_id'] :
+			return db.activities.update({"_id": activ["_id"],"u_id":g.user['name']}, {"$set":activ}, upsert=True )
+		else: 
+			activ['_id'] = g.user['name'] + "_" + (datetime.datetime.now())
+			return db.activities.insert(activ)
+
 @api.resource('/auth/')
 class Auth(Resource):
 	secret = app.secret_key or "your-256-bit-secret"
@@ -77,7 +95,7 @@ class Auth(Resource):
 			cookie = '.'.join(cookie) if all(cookie) else None
 			header = request.headers.get('Authorization')
 			header = header[len('Bearer '):] if header and header.startswith('Bearer ') else None
-			g.user = jwt.decode(cookie or header, Auth.secret)
+			g.user = {"name":"sirinyao"} #jwt.decode(cookie or header, Auth.secret)
 		except jwt.exceptions.DecodeError:
 			abort(403)
 	def delete(self):
