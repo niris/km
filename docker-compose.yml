@@ -1,0 +1,21 @@
+version: "2"
+services:
+  server:
+    image: python:alpine
+    restart: always
+    working_dir: /root
+    ports:
+      - 5000:5000
+    volumes:
+      - ./:/root:ro
+      - ./app.sqlite:/app.sqlite:rw
+    environment:
+      - JWT_SALT=your_jwt_salt
+      - PWD_SALT=your_password_salt
+      - DB_PATH=/app.sqlite
+      - FLASK_ENV=development
+    entrypoint:
+      - sh
+      - -c
+      - pip install --no-cache-dir Flask-RESTful==0.3.7 PyJWT==1.7.1 sqlt==0.0.6 &&
+        flask run --host=0.0.0.0 --reload
