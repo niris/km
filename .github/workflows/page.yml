@@ -1,0 +1,30 @@
+name: GitHub Page Deploy
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Adapt
+      run: |
+        sed s@/static/@/km/static/@g static/index.html | sed "s@path: '@path:'/km@g" > 404.html
+        sed -Ei 's@rest\((.)([^,\)]*)@rest\(\1/km\2+"fake.json"@' static/*.js
+        sed s@/static/@/km/static/@g static/manifest.json > manifest.json
+        mkdir public && cp 404.html index.html && mv manifest.json static/sw.js *.html static public
+        # add some fake API
+        cd public && mkdir -p user activity
+        echo '[{"id":"demo","domainList":["C","JS"],"department":"R&D"}]' > user/fake.json
+        echo  '{"id":"demo","domainList":["C","JS"],"department":"R&D"}' > user/demofake.json
+        echo '[{"id":1,"name":"After work#1"}]' > activity/fake.json
+        echo  '{"id":1,"name":"After work#1"}' > activity/1fake.json
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v2.4.0
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: public

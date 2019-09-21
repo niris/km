@@ -5,7 +5,8 @@ export default {
 <article>
 	<h1>RERU Experts lookup</h1>
 	<form @submit.prevent="search($event.target.json())" class=row>
-		<input type=search name=q placeholder="ใส่ keyword สำหรับค้นหา" class=col>
+		<label for=search hidden>Search</label>
+		<input id=search type=search name=q placeholder="ใส่ keyword สำหรับค้นหา" class=col>
 		<button class=col-1>🔍</button>
 	</form>
 	<div class=row>

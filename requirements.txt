@@ -1,0 +1,3 @@
+Flask-RESTful==0.3.7
+PyJWT==1.7.1
+sqlt==0.0.6

@@ -3,9 +3,13 @@
 <meta charset="utf-8">
 <title>RERU Knowlege Management</title>
 <meta name=viewport content="width=device-width,initial-scale=1.0">
-<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<meta name=description content="RERU Knowledge Management">
+<link rel=apple-touch-icon  href="/static/logo.png">
+<meta name=theme-color content="#065b9d">
+<link rel=manifest href="manifest.json">
+<link rel=icon href="data:;base64,iVBORw0KGgo=">
 <style>
-@import url(https://unpkg.com/chota@0.6.2);
+@import url(https://unpkg.com/chota@0.6.2/dist/chota.min.css);
 :root {
 --color-primary: #da1d50;
 --grid-maxWidth: 72rem;
@@ -40,13 +44,13 @@ main{margin-bottom:3em;}
 
 <main>
 	<nav class="tabs content hide-pr">
-		<img src=/static/logo.svg width=32 class=brand>
-		<a is=router-link to=/ exact>KM</a>
-		<a is=router-link v-if=$auth.get.name to=/activity> Activity</a>
+		<img src=/static/logo.svg width=32 class=brand alt=logo>
+		<a is=router-link :to="{name:'Home'}" exact>KM</a>
+		<a is=router-link v-if=$auth.get.name :to="{name:'Activity'}"> Activity</a>
 		<a is=router-link v-if=$auth.get.name :to="{name:'User', params:{id:$auth.get.name}}">My profile</a>
 		<a is=router-link v-else :to="{name:'User'}">Sign Up</a>
-		<a is=router-link v-if=$auth.get.name to=/sign>Sign Out</a>
-		<a is=router-link v-else to=/sign>Sign In</a>
+		<a is=router-link v-if=$auth.get.name :to="{name:'Sign'}">Sign Out</a>
+		<a is=router-link v-else :to="{name:'Sign'}">Sign In</a>
 	</nav>
 	<transition name=trans mode=out-in>
 		<router-view class=container>
@@ -56,13 +60,13 @@ main{margin-bottom:3em;}
 
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.4.0/marked.min.js"></script>
-<script src="https://unpkg.com/vue@2.6.10"></script>
-<script src="https://unpkg.com/vue-router@3.0.7"></script>
+<script src="https://unpkg.com/vue@2.6.10/dist/vue.min.js"></script>
+<script src="https://unpkg.com/vue-router@3.1.3/dist/vue-router.min.js"></script>
 <script type=module>
-import {$auth, $rest, $toaster} from 'https://unpkg.com/vue-authfetch@0.0.4'
+import {$auth, $rest, $toaster} from 'https://unpkg.com/vue-authfetch@0.0.4/index.js'
 
-import PageSign  from '/static/PageSign.js'
-import PageHome  from '/static/PageHome.js'
+import PageSign      from '/static/PageSign.js'
+import PageHome      from '/static/PageHome.js'
 import PageActivity  from '/static/PageActivity.js'
 import PageUser      from '/static/PageUser.js'
 
@@ -80,4 +84,8 @@ const app = new Vue({
 		]
 	}),
 })
+
+if ('serviceWorker' in navigator) { /* manifest's .serviceworker seems useless */
+	navigator.serviceWorker.register('/km/sw.js', {scope: '/km/'}).then(console.log);
+}
 </script>
