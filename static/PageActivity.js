@@ -80,14 +80,14 @@ export default {
 			window.print() // print dialog for PDF export
 		},
 		post(form) {
-			this.rest('/activity/', 'POST', form).then(id => {
+			this.rest('/km/activity/'+".json", 'POST', form).then(id => {
 				this.$root.$refs.toast("Activity saved");
 				this.$router.push({ name: "Activity", params: { id } });
 				this.editmode = false;
 			})
 		},
 		put(form) {
-			this.rest('/activity/'+form.id, 'PUT', form).then(id => {
+			this.rest('/km/activity/'+form.id+".json", 'PUT', form).then(id => {
 				this.$root.$refs.toast("Activity saved");
 				this.load(this.$route.params.id);
 				this.editmode = false;
@@ -95,11 +95,11 @@ export default {
 		},
 		load(id) {
 			this.activity = {};
-			this.rest(`/activity/`).then(activities => {
+			this.rest(`/km/activity/`+".json").then(activities => {
 				for (let dl in this.datalist) this.datalist[dl] = new Set([].concat(...activities.map(a => a[dl])))
 			})
 			if (!id) return;
-			this.rest(`/activity/${id}`).then(res => this.activity = res)
+			this.rest(`/km/activity/${id}`+".json").then(res => this.activity = res)
 		}
 	}
 };
