@@ -4,7 +4,7 @@ function transform(users, option) {
 	users.forEach(user => {
 		//user.domains = user.domains ? user.domains.split('\n') : [];
 		if (option == "D")
-			return user.domainList.forEach(d => links.push({ source: user.department, target: d }));
+			return (user.domainList||[]).forEach(d => links.push({ source: user.department, target: d }));
 
 		nodes.push({
 			id: user.id,
@@ -17,7 +17,7 @@ function transform(users, option) {
 		if (option == "A" || option == "C") {
 			links.push({ source: user.id, target: user.department });
 		} else {
-			user.domainList.forEach(d => links.push({ source: user.id, target: d }));
+			(user.domainList||[]).forEach(d => links.push({ source: user.id, target: d }));
 		}
 	});
 
