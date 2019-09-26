@@ -39,7 +39,7 @@ export default {
 	data: () => ({ user: null, activity: null }),
 	methods: {
 		search(params) {
-			["user", "activity"].forEach(t => this.rest(`/km/${t}/`+"_.json", 'GET', params).then(json => this[t] = json))
+			["user", "activity"].forEach(t => this.rest(`/km/${t}/`+"fake.json", 'GET', params).then(json => this[t] = json))
 		},
 		click(node) {
 			if (node.avatar) {

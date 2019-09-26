@@ -89,28 +89,28 @@ export default {
 	methods: {
 		load(u_id) {
 			if (!u_id) return;
-			this.rest(`/km/user/${u_id}`+"_.json").then(res => this.user = res)
-			this.rest(`/km/activity/`+"_.json", 'GET', {u_id}).then(res => this.activities = res)
-			this.rest(`/km/user/`+"_.json").then(users => {
+			this.rest(`/km/user/${u_id}`+"fake.json").then(res => this.user = res)
+			this.rest(`/km/activity/`+"fake.json", 'GET', {u_id}).then(res => this.activities = res)
+			this.rest(`/km/user/`+"fake.json").then(users => {
 				for (let dl in this.datalist) this.datalist[dl] = new Set([].concat(...users.map(u => u[dl])))
 			})
 		},
 		post(form) {
-			this.rest('/km/user/'+"_.json", "POST", form).then(id => {
+			this.rest('/km/user/'+"fake.json", "POST", form).then(id => {
 				this.$root.$refs.toast(`Profil Created ! You can Login`);
 				this.$router.push({ name: "Sign" });
 				this.editmode = false;
 			})
 		},
 		put(form) {
-			this.rest('/km/user/' + form.id+"_.json", "PUT", form).then(id => {
+			this.rest('/km/user/' + form.id+"fake.json", "PUT", form).then(id => {
 				this.$root.$refs.toast(`Profil Updated !`);
 				this.load(this.id);
 				this.editmode = false;
 			});
 		},
 		activityDelete(id) {
-			this.rest(`/km/activity/${id}`+"_.json", 'DELETE').then(r => {
+			this.rest(`/km/activity/${id}`+"fake.json", 'DELETE').then(r => {
 				this.$root.$refs.toast("Activity Deleted");
 				this.load(this.id);
 			});

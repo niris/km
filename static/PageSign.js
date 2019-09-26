@@ -11,13 +11,13 @@ export default {
 	`,
 	methods: {
 		login(form) {
-			this.rest('/km/auth/'+"_.json", 'POST', form).then(r => {
+			this.rest('/km/auth/'+"fake.json", 'POST', form).then(r => {
 				this.$auth.login(this.$root.$refs.toast("Welcome !"))
 				this.$router.push({ name: "Home" });
 			})
 		},
 		logout() {
-		  this.rest('/km/auth/'+"_.json", 'DELETE').then(this.$auth.logout)
+		  this.rest('/km/auth/'+"fake.json", 'DELETE').then(this.$auth.logout)
 		}
 	}
 }
