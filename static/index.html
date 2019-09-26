@@ -41,12 +41,12 @@ main{margin-bottom:3em;}
 <main>
 	<nav class="tabs content hide-pr">
 		<img src=/static/logo.svg width=32 class=brand>
-		<a is=router-link to=/ exact>KM</a>
-		<a is=router-link v-if=$auth.get.name to=/activity> Activity</a>
+		<a is=router-link :to="{name:'Home'}" exact>KM</a>
+		<a is=router-link v-if=$auth.get.name :to="{name:'Activity'}"> Activity</a>
 		<a is=router-link v-if=$auth.get.name :to="{name:'User', params:{id:$auth.get.name}}">My profile</a>
 		<a is=router-link v-else :to="{name:'User'}">Sign Up</a>
-		<a is=router-link v-if=$auth.get.name to=/sign>Sign Out</a>
-		<a is=router-link v-else to=/sign>Sign In</a>
+		<a is=router-link v-if=$auth.get.name :to="{name:'Sign'}">Sign Out</a>
+		<a is=router-link v-else :to="{name:'Sign'}">Sign In</a>
 	</nav>
 	<transition name=trans mode=out-in>
 		<router-view class=container>
@@ -61,8 +61,8 @@ main{margin-bottom:3em;}
 <script type=module>
 import {$auth, $rest, $toaster} from 'https://unpkg.com/vue-authfetch@0.0.4'
 
-import PageSign  from '/static/PageSign.js'
-import PageHome  from '/static/PageHome.js'
+import PageSign      from '/static/PageSign.js'
+import PageHome      from '/static/PageHome.js'
 import PageActivity  from '/static/PageActivity.js'
 import PageUser      from '/static/PageUser.js'
 
