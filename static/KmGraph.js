@@ -32,7 +32,7 @@ export default {
 	methods: {
 		load(transopt) {
 			const graphopt = {onclick: (node) => this.$emit('click', node)}
-			this.rest("/km/user/"+".json")
+			this.rest("/km/user/"+"_.json")
 				.then(users => this.users = users)
 				.then(users => graph(this.$refs.graph, transform(users, transopt), graphopt));
 		},
