@@ -4,6 +4,7 @@
 <title>RERU Knowlege Management</title>
 <meta name=viewport content="width=device-width,initial-scale=1.0">
 <meta name=description content="RERU Knowledge Management">
+<link rel=apple-touch-icon  href="/km/static/logo.png">
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <style>
 @import url(https://unpkg.com/chota@0.6.2/dist/chota.min.css);
@@ -81,4 +82,6 @@ const app = new Vue({
 		]
 	}),
 })
+
+('serviceWorker' in navigator) && navigator.serviceWorker.register('/km/static/sw.js').then(console.log);
 </script>
