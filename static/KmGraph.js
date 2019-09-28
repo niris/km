@@ -3,9 +3,10 @@ import { transform, graph } from './graph.js';
 
 export default {
 	template: `
-	<article>
+<article>
 	<div class=row v-if="!id && users">
-		<select v-model="selected" class=col>
+		<label for=mode hidden>Display Mode</label>
+		<select id=mode v-model="selected" class=col>
 			<option v-for="o in options" :value=o.value>{{ o.text }}</option>
 		</select>
 		<button @click="$refs.graph.requestFullscreen()" class=col-1>⤡</button>
