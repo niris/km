@@ -9,8 +9,8 @@
         "sizes": "192x192"
       } 
   ],
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/km/",
+  "scope": "/km/",
   "display": "standalone",
   "background_color": "#065b9d",
   "theme_color": "#da1d50"
