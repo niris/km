@@ -1,10 +1,7 @@
 const version = "0.0.1";
 const cacheName = `km-${version}`;
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(cacheName).then(cache => {
-      return cache.addAll([//(grep -o 'http[^")'"']*" static/index.html ; ls static) | sed -E "s:(.*):'\1',:"
-        `/`,
+//(grep -o 'http[^")'"']*" static/index.html ; ls static) | sed -E "s:(.*):'\1',:"
+self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c => c.addAll([
 'https://unpkg.com/chota@0.6.2/dist/chota.min.css',
 'https://d3js.org/d3.v5.min.js',
 'https://cdnjs.cloudflare.com/ajax/libs/marked/0.4.0/marked.min.js',
@@ -25,22 +22,16 @@ self.addEventListener('install', e => {
 'PageSign.js',
 'PageUser.js',
 'sw.js',
-      ])
-          .then(() => self.skipWaiting());
-    })
-  );
-});
+'/km/'
+]).then(() => self.skipWaiting()))));
 
 self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.open(cacheName)
+  event.respondWith(caches.open(cacheName)
       .then(cache => cache.match(event.request, {ignoreSearch: true}))
-      .then(response => {
-      return response || fetch(event.request);
-    })
+      .then(response => response || fetch(event.request))
   );
 });
