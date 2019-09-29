@@ -1,7 +1,7 @@
 const version = "0.0.1";
 const cacheName = `km-${version}`;
 //(grep -o 'http[^")'"']*" static/index.html ; ls static) | sed -E "s:(.*):'\1',:"
-self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c => c.addAll([
+const assets = [
 'https://unpkg.com/chota@0.6.2/dist/chota.min.css',
 'https://d3js.org/d3.v5.min.js',
 'https://cdnjs.cloudflare.com/ajax/libs/marked/0.4.0/marked.min.js',
@@ -9,7 +9,6 @@ self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c 
 'https://unpkg.com/vue-router@3.1.3/dist/vue-router.min.js',
 'https://unpkg.com/vue-authfetch@0.0.4/index.js',
 'graph.js',
-'index.html',
 'KmAvatar.js',
 'KmField.js',
 'KmFieldList.js',
@@ -23,11 +22,11 @@ self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c 
 'PageUser.js',
 'sw.js',
 '/km/'
-]).then(() => self.skipWaiting()))));
+];
 
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-});
+self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c => c.addAll(assets).then(() => self.skipWaiting()))));
+
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('fetch', event => {
   event.respondWith(caches.open(cacheName)
