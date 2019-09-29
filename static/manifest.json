@@ -4,12 +4,12 @@
   "description": "RERU Knowledge Management",
   "icons": [
     {
-      "src": "/static/logo.png",
+      "src": "/km/static/logo.png",
       "sizes": "64x64 96x96 128x128 192x192 256x256 512x512"
     }
   ],
   "serviceworker": {
-    "src": "/static/sw.js",
+    "src": "/km/static/sw.js",
     "scope": "/km",
     "update_via_cache": "none"
   },
