@@ -14,7 +14,7 @@
     "update_via_cache": "none"
   },
   "start_url": "/km/",
-  "scope": "/km/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#065b9d",
   "theme_color": "#da1d50"
