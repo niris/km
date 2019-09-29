@@ -86,6 +86,6 @@ const app = new Vue({
 })
 
 if ('serviceWorker' in navigator) { /* manifest's .serviceworker seems useless*/
-	navigator.serviceWorker.register('/km/static/sw.js').then(console.log);
+	navigator.serviceWorker.register('/km/static/sw.js', {scope: '/km/'}).then(console.log);
 }
 </script>

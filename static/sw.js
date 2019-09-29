@@ -23,7 +23,7 @@ const assets = [
 'sw.js',
 '/km/'
 ];
-
+console.log(self)
 self.addEventListener('install', e => e.waitUntil(caches.open(cacheName).then(c => c.addAll(assets).then(() => self.skipWaiting()))));
 
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
