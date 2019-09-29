@@ -1,0 +1,21 @@
+{
+  "name": "RERU Knowledge Management",
+  "short_name": "RERU KM",
+  "description": "RERU Knowledge Management",
+  "icons": [
+    {
+      "src": "/km/static/logo.png",
+      "sizes": "64x64 96x96 128x128 192x192 256x256 512x512"
+    }
+  ],
+  "serviceworker": {
+    "src": "/km/static/sw.js",
+    "scope": "/km",
+    "update_via_cache": "none"
+  },
+  "start_url": "/km/",
+  "scope": "/km/",
+  "display": "standalone",
+  "background_color": "#065b9d",
+  "theme_color": "#da1d50"
+}
