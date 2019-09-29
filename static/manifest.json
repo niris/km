@@ -5,11 +5,7 @@
   "icons": [
     {
       "src": "/static/logo.png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/static/logo.svg",
-      "sizes": "512x512"
+      "sizes": "64x64 96x96 128x128 192x192 256x256 512x512"
     }
   ],
   "serviceworker": {
