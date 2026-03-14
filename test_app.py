@@ -7,6 +7,8 @@ import os
 import json
 
 db_path = 'file::memory:?cache=shared'
+
+
 @patch.dict(os.environ, {'DB_PATH': db_path})
 class AppTest(TestCase):
     @classmethod
